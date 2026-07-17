@@ -31,7 +31,7 @@ COORD_PRECISION = 7
 
 ASSET_CATS = {
     "LSkabel", "MSkabel", "Amantelbuis",
-    "LSmof", "LSoverdrachtspunt", "OVLoverdrachtspunt",
+    "LSmof", "MSmof", "LSoverdrachtspunt", "OVLoverdrachtspunt",
     "LSkast", "MSstation",
 }
 
