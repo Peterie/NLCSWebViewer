@@ -1,4 +1,4 @@
-# 002 — NLCS++ upload button in the viewer
+# 109 — NLCS++ upload button in the viewer
 
 ## Goal
 
@@ -9,7 +9,7 @@ converted GeoJSON is stored in the repo's `resources/` folder.
 ## Background
 
 Stock Dekart offers no extension point for a custom button, so this task starts with a
-**platform decision** that also determines tasks 003 and 004:
+**platform decision** that also determines tasks 110 and 111:
 
 - **Custom viewer app** — build our own viewer (e.g. on Kepler.gl or MapLibre) that
   embeds the map and owns the whole UI. Dekart can remain alongside for ad-hoc
@@ -43,7 +43,7 @@ Dekart is used unmodified.
 
 - From a running viewer, adding `data/enexis_voorbeeld_3092025_1554.xml` via the
   button shows the drawing on the map and creates
-  `resources/enexis_voorbeeld_3092025_1554/` with the converted GeoJSON.
+  `resources/enexis_voorbeeld_3092025_1554.geojson`.
 - Adding the same file again replaces (does not duplicate) both the layers and the
   stored output.
 - Adding an invalid XML shows an error and leaves map and `resources/` untouched.
@@ -56,6 +56,6 @@ Task 001 (GeoJSON pipeline).
 
 ## Out of scope
 
-- Layer selector redesign (task 003) and object viewer (task 004).
+- Layer selector redesign (task 110) and object viewer (task 111).
 - Automatic git commits of `resources/`.
 - Authentication.

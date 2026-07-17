@@ -13,7 +13,7 @@ column — chosen for the first demo because Dekart's CSV upload was the shortes
 GeoJSON is the more natural interchange format for this data: geometry is first-class
 (no WKT-in-a-string), properties are typed, and it is the lingua franca of web map
 tooling (Kepler.gl, MapLibre, QGIS) — which matters for the custom viewer work in
-tasks 002–004.
+tasks 109–111.
 
 ## Specifications
 
@@ -59,5 +59,5 @@ None — first of the owner-priority tasks.
 
 ## Out of scope
 
-- Viewer/UI work (tasks 002–004).
+- Viewer/UI work (tasks 109–111).
 - Changing which attributes are extracted (task 103).

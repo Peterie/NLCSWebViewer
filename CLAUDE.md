@@ -145,9 +145,10 @@ attributes. Dataset naming: `<Drawing label> · <Category>`.
 
 Multi-file viewing is emulated in stock Kepler by creating **one dataset per
 (file × category)** and toggling layer visibility (default: first file visible,
-others hidden). This is a workaround, not the desired UX — tasks 002–004 replace it
-with real file/object-type toggles on a platform chosen in task 002 (custom viewer vs
-Dekart fork; stock Dekart has no UI extension points).
+others hidden). This is a workaround, not the desired UX — tasks 109–111 (formerly
+002–004, moved out of the owner-priority range) replace it with real file/object-type
+toggles on a platform chosen in task 109 (custom viewer vs Dekart fork; stock Dekart
+has no UI extension points).
 
 </details>
 

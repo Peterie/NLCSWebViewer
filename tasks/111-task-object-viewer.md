@@ -1,4 +1,4 @@
-# 004 — Object viewer sidebar
+# 111 — Object viewer sidebar
 
 ## Goal
 
@@ -11,13 +11,13 @@ map.
 Tooltips answer "what is this thing I'm looking at"; the object viewer answers the
 inverse: "where is the object I'm looking for". NLCS++ features carry identifying
 attributes suited for this (Handle, feature ID, AssetId, category, status, street
-fields where present). Runs on the platform chosen in task 002.
+fields where present). Runs on the platform chosen in task 109.
 
 ## Specifications
 
 - **Sidebar** (collapsible) showing the objects of the loaded drawings, organized by
   file and object type, with a count per group. Respect the visibility state from
-  task 003 (hidden groups are visually distinguished or filtered out — pick one and
+  task 110 (hidden groups are visually distinguished or filtered out — pick one and
   apply it consistently).
 - **Search**: a text input filtering objects across all loaded files as the user
   types; matches against identifying attributes (at minimum: handle, feature ID,
@@ -47,7 +47,7 @@ fields where present). Runs on the platform chosen in task 002.
 
 ## Dependencies
 
-Task 002 (platform); task 003 (visibility model it must respect).
+Task 109 (platform); task 110 (visibility model it must respect).
 
 ## Out of scope
 
