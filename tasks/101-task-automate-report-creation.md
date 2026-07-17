@@ -55,7 +55,8 @@ it into the repo as a maintained tool.
 
 ## Dependencies
 
-None (first task of the 101+ range).
+Task 001 (the pipeline output is GeoJSON by then; upload and layer binding must follow
+that format instead of the CSV flow described from the demo).
 
 ## Out of scope
 
