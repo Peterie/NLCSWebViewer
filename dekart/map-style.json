@@ -1,0 +1,586 @@
+{
+  "version": "v1",
+  "config": {
+    "visState": {
+      "filters": [],
+      "layers": [
+        {
+          "id": "1a9phrq",
+          "type": "geojson",
+          "config": {
+            "dataId": "6f4bab14-9de1-4ba5-bcbd-32d52287f63d",
+            "columnMode": "geojson",
+            "label": "enexis_voorbeeld_3092025_1554",
+            "color": [
+              18,
+              147,
+              154
+            ],
+            "highlightColor": [
+              252,
+              242,
+              26,
+              255
+            ],
+            "columns": {
+              "geojson": "_geojson"
+            },
+            "isVisible": true,
+            "visConfig": {
+              "opacity": 0.8,
+              "strokeOpacity": 0.8,
+              "thickness": 0.5,
+              "strokeColor": [
+                221,
+                178,
+                124
+              ],
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "category": "Uber",
+                "colors": [
+                  "#4C0035",
+                  "#880030",
+                  "#B72F15",
+                  "#D6610A",
+                  "#EF9100",
+                  "#FFC300"
+                ]
+              },
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "category": "Uber",
+                "colors": [
+                  "#4C0035",
+                  "#880030",
+                  "#B72F15",
+                  "#D6610A",
+                  "#EF9100",
+                  "#FFC300"
+                ]
+              },
+              "radius": 10,
+              "sizeRange": [
+                0,
+                10
+              ],
+              "radiusRange": [
+                0,
+                50
+              ],
+              "heightRange": [
+                0,
+                500
+              ],
+              "elevationScale": 5,
+              "stroked": true,
+              "filled": false,
+              "enable3d": false,
+              "wireframe": false,
+              "fixedHeight": false
+            },
+            "hidden": false,
+            "textLabel": [
+              {
+                "field": null,
+                "color": [
+                  255,
+                  255,
+                  255
+                ],
+                "size": 18,
+                "offset": [
+                  0,
+                  0
+                ],
+                "anchor": "start",
+                "alignment": "center",
+                "outlineWidth": 0,
+                "outlineColor": [
+                  255,
+                  0,
+                  0,
+                  255
+                ],
+                "background": false,
+                "backgroundColor": [
+                  0,
+                  0,
+                  200,
+                  255
+                ]
+              }
+            ]
+          },
+          "visualChannels": {
+            "colorField": null,
+            "colorScale": "quantile",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile",
+            "sizeField": null,
+            "sizeScale": "linear",
+            "heightField": null,
+            "heightScale": "linear",
+            "radiusField": null,
+            "radiusScale": "linear"
+          }
+        },
+        {
+          "id": "8tuofh",
+          "type": "geojson",
+          "config": {
+            "dataId": "f575f29a-2aee-4edf-ba83-37105d692b80",
+            "columnMode": "geojson",
+            "label": "xml_revisie_2",
+            "color": [
+              137,
+              218,
+              193
+            ],
+            "highlightColor": [
+              252,
+              242,
+              26,
+              255
+            ],
+            "columns": {
+              "geojson": "_geojson"
+            },
+            "isVisible": false,
+            "visConfig": {
+              "opacity": 0.8,
+              "strokeOpacity": 0.8,
+              "thickness": 0.5,
+              "strokeColor": [
+                179,
+                173,
+                158
+              ],
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "category": "Uber",
+                "colors": [
+                  "#4C0035",
+                  "#880030",
+                  "#B72F15",
+                  "#D6610A",
+                  "#EF9100",
+                  "#FFC300"
+                ]
+              },
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "category": "Uber",
+                "colors": [
+                  "#4C0035",
+                  "#880030",
+                  "#B72F15",
+                  "#D6610A",
+                  "#EF9100",
+                  "#FFC300"
+                ]
+              },
+              "radius": 10,
+              "sizeRange": [
+                0,
+                10
+              ],
+              "radiusRange": [
+                0,
+                50
+              ],
+              "heightRange": [
+                0,
+                500
+              ],
+              "elevationScale": 5,
+              "stroked": true,
+              "filled": false,
+              "enable3d": false,
+              "wireframe": false,
+              "fixedHeight": false
+            },
+            "hidden": false,
+            "textLabel": [
+              {
+                "field": null,
+                "color": [
+                  255,
+                  255,
+                  255
+                ],
+                "size": 18,
+                "offset": [
+                  0,
+                  0
+                ],
+                "anchor": "start",
+                "alignment": "center",
+                "outlineWidth": 0,
+                "outlineColor": [
+                  255,
+                  0,
+                  0,
+                  255
+                ],
+                "background": false,
+                "backgroundColor": [
+                  0,
+                  0,
+                  200,
+                  255
+                ]
+              }
+            ]
+          },
+          "visualChannels": {
+            "colorField": null,
+            "colorScale": "quantile",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile",
+            "sizeField": null,
+            "sizeScale": "linear",
+            "heightField": null,
+            "heightScale": "linear",
+            "radiusField": null,
+            "radiusScale": "linear"
+          }
+        },
+        {
+          "id": "em5wu1p",
+          "type": "geojson",
+          "config": {
+            "dataId": "50c55984-a337-49ef-a07e-58192ede829d",
+            "columnMode": "geojson",
+            "label": "xml_revisie",
+            "color": [
+              231,
+              159,
+              213
+            ],
+            "highlightColor": [
+              252,
+              242,
+              26,
+              255
+            ],
+            "columns": {
+              "geojson": "_geojson"
+            },
+            "isVisible": true,
+            "visConfig": {
+              "opacity": 0.8,
+              "strokeOpacity": 0.8,
+              "thickness": 0.6,
+              "strokeColor": [
+                30,
+                150,
+                190
+              ],
+              "colorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "category": "Uber",
+                "colors": [
+                  "#4C0035",
+                  "#880030",
+                  "#B72F15",
+                  "#D6610A",
+                  "#EF9100",
+                  "#FFC300"
+                ]
+              },
+              "strokeColorRange": {
+                "name": "Global Warming",
+                "type": "sequential",
+                "category": "Uber",
+                "colors": [
+                  "#4C0035",
+                  "#880030",
+                  "#B72F15",
+                  "#D6610A",
+                  "#EF9100",
+                  "#FFC300"
+                ]
+              },
+              "radius": 4.5,
+              "sizeRange": [
+                0,
+                10
+              ],
+              "radiusRange": [
+                0,
+                50
+              ],
+              "heightRange": [
+                0,
+                500
+              ],
+              "elevationScale": 5,
+              "stroked": true,
+              "filled": false,
+              "enable3d": false,
+              "wireframe": false,
+              "fixedHeight": false
+            },
+            "hidden": false,
+            "textLabel": [
+              {
+                "field": null,
+                "color": [
+                  255,
+                  255,
+                  255
+                ],
+                "size": 18,
+                "offset": [
+                  0,
+                  0
+                ],
+                "anchor": "start",
+                "alignment": "center",
+                "outlineWidth": 0,
+                "outlineColor": [
+                  255,
+                  0,
+                  0,
+                  255
+                ],
+                "background": false,
+                "backgroundColor": [
+                  0,
+                  0,
+                  200,
+                  255
+                ]
+              }
+            ]
+          },
+          "visualChannels": {
+            "colorField": null,
+            "colorScale": "quantile",
+            "strokeColorField": null,
+            "strokeColorScale": "quantile",
+            "sizeField": null,
+            "sizeScale": "linear",
+            "heightField": null,
+            "heightScale": "linear",
+            "radiusField": null,
+            "radiusScale": "linear"
+          }
+        }
+      ],
+      "effects": [],
+      "interactionConfig": {
+        "tooltip": {
+          "fieldsToShow": {
+            "50c55984-a337-49ef-a07e-58192ede829d": [
+              {
+                "name": "category",
+                "format": null
+              },
+              {
+                "name": "functie",
+                "format": null
+              },
+              {
+                "name": "status",
+                "format": null
+              },
+              {
+                "name": "bedrijfstoestand",
+                "format": null
+              },
+              {
+                "name": "beheerder",
+                "format": null
+              },
+              {
+                "name": "datum_aanleg",
+                "format": null
+              },
+              {
+                "name": "netgekoppeld",
+                "format": null
+              },
+              {
+                "name": "subnettype",
+                "format": null
+              }
+            ],
+            "f575f29a-2aee-4edf-ba83-37105d692b80": [
+              {
+                "name": "category",
+                "format": null
+              },
+              {
+                "name": "functie",
+                "format": null
+              },
+              {
+                "name": "status",
+                "format": null
+              },
+              {
+                "name": "bedrijfstoestand",
+                "format": null
+              },
+              {
+                "name": "beheerder",
+                "format": null
+              },
+              {
+                "name": "datum_aanleg",
+                "format": null
+              },
+              {
+                "name": "netgekoppeld",
+                "format": null
+              },
+              {
+                "name": "subnettype",
+                "format": null
+              }
+            ],
+            "6f4bab14-9de1-4ba5-bcbd-32d52287f63d": [
+              {
+                "name": "category",
+                "format": null
+              },
+              {
+                "name": "functie",
+                "format": null
+              },
+              {
+                "name": "status",
+                "format": null
+              },
+              {
+                "name": "bedrijfstoestand",
+                "format": null
+              },
+              {
+                "name": "beheerder",
+                "format": null
+              },
+              {
+                "name": "datum_aanleg",
+                "format": null
+              },
+              {
+                "name": "netgekoppeld",
+                "format": null
+              },
+              {
+                "name": "subnettype",
+                "format": null
+              }
+            ]
+          },
+          "compareMode": false,
+          "compareType": "absolute",
+          "enabled": true
+        },
+        "brush": {
+          "size": 0.5,
+          "enabled": false
+        },
+        "geocoder": {
+          "enabled": false
+        },
+        "coordinate": {
+          "enabled": true
+        }
+      },
+      "layerBlending": "normal",
+      "overlayBlending": "normal",
+      "splitMaps": [],
+      "animationConfig": {
+        "currentTime": null,
+        "speed": 1
+      },
+      "editor": {
+        "features": [
+          {
+            "properties": {
+              "category": "LSoverdrachtspunt",
+              "handle": "5FCE",
+              "status": "BESTAAND",
+              "bedrijfstoestand": "IN BEDRIJF",
+              "functie": "Huisaansluiting",
+              "subnettype": "",
+              "eigenaar": "Netbeheerder",
+              "beheerder": "Netbeheerder",
+              "datum_aanleg": "",
+              "netgekoppeld": "",
+              "bovengronds": "",
+              "asset_id": "{00000000-0000-0000-0000-000000000000}",
+              "feature_id": "_0D9A048C-3F35-46EB-98F8-52C586C8E03E",
+              "projectnummer": null,
+              "netbeheerder": null,
+              "tekeningtype": null,
+              "toelichting": null
+            },
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                5.6107922,
+                51.317253
+              ]
+            },
+            "id": "1o7f"
+          }
+        ],
+        "visible": true
+      }
+    },
+    "mapState": {
+      "bearing": 0,
+      "dragRotate": false,
+      "latitude": 51.31721140121471,
+      "longitude": 5.610899219221461,
+      "pitch": 0,
+      "zoom": 18.420128667472106,
+      "isSplit": false,
+      "isViewportSynced": true,
+      "isZoomLocked": false,
+      "splitMapViewports": []
+    },
+    "mapStyle": {
+      "styleType": "dark",
+      "topLayerGroups": {},
+      "visibleLayerGroups": {
+        "label": true,
+        "road": true,
+        "border": false,
+        "building": true,
+        "water": true,
+        "land": true,
+        "3d building": false
+      },
+      "threeDBuildingColor": [
+        9.665468314072013,
+        17.18305478057247,
+        31.1442867897876
+      ],
+      "backgroundColor": [
+        0,
+        0,
+        0
+      ],
+      "mapStyles": {}
+    },
+    "uiState": {
+      "mapControls": {
+        "mapLegend": {
+          "active": false
+        }
+      }
+    }
+  }
+}
