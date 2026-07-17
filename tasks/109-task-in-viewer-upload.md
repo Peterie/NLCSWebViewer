@@ -1,5 +1,11 @@
 # 109 — NLCS++ upload button in the viewer
 
+## Status: Not started (deprioritized)
+
+Originally scoped as an owner-priority task (`002`, right after task 001); moved to
+this number and out of the reserved range as out-of-scope-for-now. Spec unchanged,
+just deprioritized — see tasks/overview.md's Reserved range note.
+
 ## Goal
 
 A button in the map viewer through which a user manually adds an NLCS++ XML file. The

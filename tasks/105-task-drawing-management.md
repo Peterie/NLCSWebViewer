@@ -1,5 +1,7 @@
 # 105 — Drawing management
 
+## Status: Not started
+
 ## Goal
 
 Give uploaded drawings a lifecycle: see what has been uploaded, replace a drawing by

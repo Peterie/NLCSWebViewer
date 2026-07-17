@@ -203,33 +203,19 @@ upload/report-build time (task 101), not just uploading converter output directl
 
 ## Existing demo reports (local Dekart)
 
-- `16cfa6ff-8734-468b-a9d2-3c5b5e8ba820` — single-file demo of the voorbeeld drawing.
-- `0369a54a-8c47-4ccb-9ef2-a536d805a5e3` — "NLCS++ multi-file viewer" (all three
-  files, 27 datasets).
-- Two stray *empty* reports titled "NLCS++ viewer — Enexis voorbeeld & revisies" may
-  still exist from a failed scripted run; they are safe to delete via the UI.
-- `5cffe9d7-4819-43f3-aabc-025f880e93cf` — "Task 001 GeoJSON verification
-  (single-file)", the single merged-GeoJSON layer for the voorbeeld drawing, kept as
-  evidence the new converter output renders in Dekart with working tooltips.
-- Two throwaway debug reports from diagnosing the `mapState` crash (a small-subset
-  GeoJSON test and a small CSV+WKT test) are safe to delete via the UI; their ids
-  weren't kept since they carry no lasting value.
-- `735d42c7-fba5-40d0-9e9d-a3b382403ddd` — the report the owner hand-styled in the
-  Dekart UI; `dekart/map-style.json` is a snapshot of this report's `map_config`.
-  Treat this report as **live/owned by the user** — don't overwrite its config.
-- `d314728f-9a80-4fbc-adca-9104a755c30d` — "scholtensteeg", built by applying
-  `dekart/map-style.json` (with dataset-id substitution) to a new upload. Confirms the
-  saved style is actually reusable across reports, not just theoretically.
-- `67e2cb5f-c00f-4da1-aa58-3dbb979aa685` — first `scripts/create_report.py` test run,
-  made before the lat/lon swap bug (above) was fixed; map is pointed at the wrong
-  location. Stray, safe to delete via the UI.
-- `1fda9569-93cc-4a37-a79e-bdddc9f14148` — "enexis_voorbeeld_3092025_1554", the
-  corrected `scripts/create_report.py` run; visually verified correct. Kept as
-  evidence task 101 works end-to-end.
-- `6cd6e753-dd9d-4102-bc2f-1e98cd8a532a` and `aad5be4d-210f-4c4c-bd0f-0189ce37a3ca` —
-  `scripts/create_report.py` runs on `xml_revisie`/`xml_revisie_2` (acceptance
-  criteria: "running it on each of the three example files succeeds"). Near-duplicates
-  of the voorbeeld report; safe to delete via the UI if the report list gets noisy.
+**All reports were archived by the owner on 2026-07-17** (via the Dekart UI's
+Archive action — there is no delete/archive tool exposed through the `dekart` CLI's
+MCP interface, even though the underlying `ArchiveReport` gRPC method exists in
+Dekart's own client code; confirmed by grepping the served JS bundle for it and
+finding it's not in `dekart tools`' list). This includes `735d42c7-...`, the report
+`dekart/map-style.json` was captured from — archiving is presumed non-destructive
+(a hide/soft-delete toggle, not deletion), but there is currently **no active
+report** in local Dekart to point to as a working example. The style/tooltip
+config lives on in `dekart/map-style.json` regardless of that source report's
+archived state.
+
+Next time a report is built (e.g. via `scripts/create_report.py`), record its id
+and purpose here again.
 
 ## Domain notes worth knowing
 

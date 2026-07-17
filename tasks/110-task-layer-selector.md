@@ -1,5 +1,11 @@
 # 110 — Layer selector: file toggles + object-type buttons
 
+## Status: Not started (deprioritized)
+
+Originally scoped as an owner-priority task (`003`); moved to this number and out
+of the reserved range as out-of-scope-for-now. Spec unchanged, just deprioritized —
+see tasks/overview.md's Reserved range note.
+
 ## Goal
 
 Replace the current one-checkbox-per-layer selector with two compact controls:

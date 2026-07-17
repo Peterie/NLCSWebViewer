@@ -1,5 +1,11 @@
 # 108 — Split GeoJSON output by discipline
 
+## Status: Not started (deprioritized)
+
+Originally scoped as an owner-priority task (`001b`, directly after task 001);
+moved to this number and out of the reserved range as out-of-scope-for-now. Spec
+unchanged, just deprioritized — see tasks/overview.md's Reserved range note.
+
 ## Goal
 
 Split the converter's single merged GeoJSON (task 001) into **one file per

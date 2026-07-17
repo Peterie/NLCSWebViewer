@@ -20,21 +20,29 @@ numerical order unless dependencies say otherwise.
 
 ## Tasks (chronological)
 
-| # | Task | Goal | Depends on |
-|---|------|------|------------|
-| 001 | [GeoJSON as conversion target](001-task-geojson-conversion.md) | Converter outputs GeoJSON instead of CSV; resources/ regenerated | — |
-| 002–100 | *(reserved for project owner)* | Prioritized pre-work | — |
-| 101 | [Automate report creation](101-task-automate-report-creation.md) | One command: NLCS++ XML in → styled Dekart report out | 001 |
-| 102 | [Schema validation](102-task-schema-validation.md) | Reject invalid files before conversion, with actionable errors | — |
-| 103 | [Converter hardening](103-task-converter-hardening.md) | Handle unknown categories and format variants gracefully | — |
-| 104 | [Web upload app](104-task-web-upload-app.md) | Browser upload → progress → link to the Dekart map | 101, 102, 103 |
-| 105 | [Drawing management](105-task-drawing-management.md) | List, replace, and delete uploaded drawings | 104 |
-| 106 | [Revision comparison](106-task-revision-comparison.md) | View what changed between two revisions of a drawing | 101 |
-| 107 | [Deployment & README](107-task-deployment-and-readme.md) | Reproducible setup instructions and a project README | 104 |
-| 108 | [Split GeoJSON output by discipline](108-task-discipline-split.md) | One GeoJSON per discipline (Elec/Gas/Telecom) + a shared boundary file, instead of one merged file | 001 |
-| 109 | [NLCS++ upload button in the viewer](109-task-in-viewer-upload.md) | Add file via a button in the viewer; convert, show on map, store in resources/ | 001 |
-| 110 | [Layer selector redesign](110-task-layer-selector.md) | One toggle per file + one button per object type (across all files) | 109 |
-| 111 | [Object viewer sidebar](111-task-object-viewer.md) | Search objects, highlight, and go to them on the map | 109, 110 |
+| # | Task | Goal | Depends on | Status |
+|---|------|------|------------|--------|
+| 001 | [GeoJSON as conversion target](001-task-geojson-conversion.md) | Converter outputs GeoJSON instead of CSV; resources/ regenerated | — | Done |
+| 002–100 | *(reserved for project owner)* | Prioritized pre-work | — | — |
+| 101 | [Automate report creation](101-task-automate-report-creation.md) | One command: NLCS++ XML in → styled Dekart report out | 001 | Done |
+| 102 | [Schema validation](102-task-schema-validation.md) | Reject invalid files before conversion, with actionable errors | — | Not started |
+| 103 | [Converter hardening](103-task-converter-hardening.md) | Handle unknown categories and format variants gracefully | — | Done |
+| 104 | [Web upload app](104-task-web-upload-app.md) | Browser upload → progress → link to the Dekart map | 101, 102, 103 | Not started |
+| 105 | [Drawing management](105-task-drawing-management.md) | List, replace, and delete uploaded drawings | 104 | Not started |
+| 106 | [Revision comparison](106-task-revision-comparison.md) | View what changed between two revisions of a drawing | 101 | Not started |
+| 107 | [Deployment & README](107-task-deployment-and-readme.md) | Reproducible setup instructions and a project README | 104 | Not started |
+| 108 | [Split GeoJSON output by discipline](108-task-discipline-split.md) | One GeoJSON per discipline (Elec/Gas/Telecom) + a shared boundary file, instead of one merged file | 001 | Not started (deprioritized) |
+| 109 | [NLCS++ upload button in the viewer](109-task-in-viewer-upload.md) | Add file via a button in the viewer; convert, show on map, store in resources/ | 001 | Not started (deprioritized) |
+| 110 | [Layer selector redesign](110-task-layer-selector.md) | One toggle per file + one button per object type (across all files) | 109 | Not started (deprioritized) |
+| 111 | [Object viewer sidebar](111-task-object-viewer.md) | Search objects, highlight, and go to them on the map | 109, 110 | Not started (deprioritized) |
+
+Status meanings: **Done** = implemented, verified, and merged/committed. **Not
+started** = spec exists, no implementation yet. **Not started (deprioritized)** =
+was in the owner-priority range (0–100) originally, moved out to the 101+ backlog as
+out of scope for now (see Reserved range above) — spec unchanged, just lower
+priority. Update this column when a task's state changes; see each task file's own
+`## Status` section for more detail (what was actually built, decisions made,
+open follow-ups).
 
 ## Ordering rationale
 

@@ -1,5 +1,7 @@
 # 104 — Web upload app
 
+## Status: Not started
+
 ## Goal
 
 The upload interface from

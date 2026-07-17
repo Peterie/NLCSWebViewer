@@ -1,5 +1,7 @@
 # 106 — Revision comparison
 
+## Status: Not started
+
 ## Goal
 
 Let a user see what changed between two revisions of the same drawing — the "future

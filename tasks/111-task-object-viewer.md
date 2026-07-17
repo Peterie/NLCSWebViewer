@@ -1,5 +1,11 @@
 # 111 — Object viewer sidebar
 
+## Status: Not started (deprioritized)
+
+Originally scoped as an owner-priority task (`004`); moved to this number and out
+of the reserved range as out-of-scope-for-now. Spec unchanged, just deprioritized —
+see tasks/overview.md's Reserved range note.
+
 ## Goal
 
 A sidebar in the viewer that lists the objects of the loaded NLCS++ files, lets the

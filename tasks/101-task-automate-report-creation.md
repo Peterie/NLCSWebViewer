@@ -1,5 +1,16 @@
 # 101 — Automate report creation
 
+## Status: Done (2026-07-17)
+
+Implemented as `scripts/create_report.py`. Diverges from this spec in two ways,
+both owner decisions made before implementation: styling follows the owner's actual
+hand-tuned `dekart/map-style.json` (one layer per file, single color, category as a
+tooltip field) rather than the per-category-color design below, and every run always
+creates a **new** report rather than tracking/reusing one per drawing (no
+idempotency — stray reports are cleaned up manually). See CLAUDE.md's "Task 101 and
+103 status" note for the full picture, including a lat/lon-swap bug caught during
+testing.
+
 ## Goal
 
 A single repo command that takes an NLCS++ XML file and produces a fully styled,

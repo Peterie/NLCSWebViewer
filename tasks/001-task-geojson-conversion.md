@@ -1,5 +1,14 @@
 # 001 — GeoJSON as conversion target
 
+## Status: Done (2026-07-17)
+
+Implemented as a single merged GeoJSON per drawing (not the grouped/per-category
+split originally spec'd below — an owner decision made mid-implementation; see task
+108 for the discipline-based split that was carved out of this task afterward).
+`scripts/nlcs2csv.py` renamed to `scripts/nlcs2geojson.py`; `resources/` holds one
+flat `<name>.geojson` per source file. Verified end-to-end by uploading to local
+Dekart and confirming render + tooltips.
+
 ## Goal
 
 Replace CSV with **GeoJSON** as the output format of the conversion pipeline. The
