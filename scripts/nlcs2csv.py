@@ -6,7 +6,7 @@ directly (each CSV has a lowercase `geometry` WKT column that Kepler.gl picks up
 
 Usage:
     python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt
-    .venv/bin/python scripts/nlcs2csv.py data/enexis_voorbeeld_3092025_1554.xml out/
+    .venv/bin/python scripts/nlcs2csv.py data/enexis_voorbeeld_3092025_1554.xml out/ [--per-category]
 
 Emits one CSV per layer group:
   boundary.csv  - project area polygon (AprojectReferentie)
@@ -14,12 +14,15 @@ Emits one CSV per layer group:
   points.csv    - LSmof, LSoverdrachtspunt, OVLoverdrachtspunt
   areas.csv     - LSkast, MSstation
 
+With --per-category it additionally writes one cat_<Category>.csv per asset
+category (e.g. cat_LSkabel.csv) — useful for one-layer-per-object-type maps.
+The committed resources/ folders were generated with this flag.
+
 Feature categories not in the groups above are counted as UNMAPPED and skipped,
 as are features without geometry (e.g. AmantelbuisInhoud).
 """
 
 import csv
-import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -75,10 +78,11 @@ def geometry_wkt(geom_el):
     return None
 
 
-def main(xml_path, out_dir):
+def main(xml_path, out_dir, per_category=False):
     root = ET.parse(xml_path).getroot()
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
+    cat_rows = {}
 
     writers = {}
     files = {}
@@ -119,16 +123,33 @@ def main(xml_path, out_dir):
             key = ATTR_MAP.get(child.tag.split("}")[-1])
             if key and child.text:
                 row[key] = child.text.strip()
-        writers[group].writerow([wkt] + [row.get(c, "") for c in ATTR_COLS])
+        out_row = [wkt] + [row.get(c, "") for c in ATTR_COLS]
+        writers[group].writerow(out_row)
+        if per_category:
+            cat_rows.setdefault(cat, []).append(out_row)
         counts[cat] = counts.get(cat, 0) + 1
 
     for f in files.values():
         f.close()
     bf.close()
+
+    for cat, rows in cat_rows.items():
+        with open(out / f"cat_{cat}.csv", "w", newline="", encoding="utf-8") as cf:
+            w = csv.writer(cf)
+            w.writerow(["geometry"] + ATTR_COLS)
+            w.writerows(rows)
     for k in sorted(counts):
         print(f"{k}: {counts[k]}")
     print(f"skipped (no geometry): {skipped}")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("xml_path", help="NLCS Netbeheer XML file to convert")
+    parser.add_argument("out_dir", help="output directory for the CSVs")
+    parser.add_argument("--per-category", action="store_true",
+                        help="also write one cat_<Category>.csv per asset category")
+    args = parser.parse_args()
+    main(args.xml_path, args.out_dir, args.per_category)
