@@ -8,18 +8,29 @@ hand for the demo reports.
 
 ## Background
 
-The flow was proven end-to-end on 2026-07-17: `scripts/nlcs2csv.py --per-category`
-converts a drawing to per-category CSVs (see `resources/` for committed examples), and
-a sequence of `dekart` CLI calls builds a report with one layer per asset category.
-The orchestration currently exists only as untracked scratch scripts; this task brings
-it into the repo as a maintained tool.
+The flow was proven end-to-end on 2026-07-17, using per-category CSV output from what
+was then `scripts/nlcs2csv.py` (see `resources/` for committed examples), and a
+sequence of `dekart` CLI calls builds a report with one layer per asset category. Task
+001 replaced that CSV output with GeoJSON, but also changed the output shape: the
+converter (renamed to `scripts/nlcs2geojson.py`) now emits a **single merged
+FeatureCollection per drawing** (boundary + all categories together, distinguished by
+each feature's `category` property) instead of grouped/per-category files —
+`resources/` now holds one flat `<name>.geojson` per example file. This was an owner
+decision made during task 001, and it means the "one dataset + layer per category"
+report structure described below can no longer be built by uploading separate
+per-category files; whoever picks up this task must decide how to keep per-category
+styling with a single uploaded dataset (e.g. Kepler layer filters keyed on `category`
+against the one dataset, or splitting the merged GeoJSON into per-category slices at
+upload time instead of at conversion time). The orchestration currently exists only as
+untracked scratch scripts; this task brings it into the repo as a maintained tool.
 
 ## Specifications
 
 - Input: path to one NLCS++ XML file. Output: a Dekart report URL on stdout; non-zero
   exit with a clear message on failure.
-- Conversion reuses `scripts/nlcs2csv.py` (per-category mode); do not duplicate its
-  logic.
+- Conversion reuses `scripts/nlcs2geojson.py`; do not duplicate its logic. It now
+  produces one file for the whole drawing (see Background) — resolve the per-category
+  layer question above before implementing.
 - Report structure: one dataset + layer per asset category present in the file, plus
   the project boundary (Grens). Dataset names follow `<Drawing label> · <Category>`.
 - Control-plane order per dataset: `create_dataset` → `update_dataset_name` →
@@ -55,7 +66,7 @@ it into the repo as a maintained tool.
 
 ## Dependencies
 
-Task 001 (the pipeline output is GeoJSON by then; upload and layer binding must follow
+Task 001 (done — the pipeline output is GeoJSON; upload and layer binding must follow
 that format instead of the CSV flow described from the demo).
 
 ## Out of scope

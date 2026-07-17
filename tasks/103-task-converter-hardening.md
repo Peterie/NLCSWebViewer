@@ -2,7 +2,7 @@
 
 ## Goal
 
-Make `scripts/nlcs2csv.py` robust for real-world NLCS++ input: treat asset categories
+Make `scripts/nlcs2geojson.py` robust for real-world NLCS++ input: treat asset categories
 as open-ended, tolerate optional data, and support other grid operators' variants —
 as required by
 [docs/spec/02-nlcs-data-format.md](../docs/spec/02-nlcs-data-format.md) ("a viewer
@@ -11,16 +11,19 @@ these").
 
 ## Background
 
-The converter was built against one Enexis example. It hard-codes three category
-groups (lines/points/areas) and **skips** categories outside them (they are only
-counted as `UNMAPPED`). The full NLCS Netbeheer schema defines many more categories
-(gas, water, telecom, MS/LS variants) that real files will contain.
+The converter was built against one Enexis example. It hard-codes a fixed allowlist of
+known asset categories and **skips** categories outside it (they are only counted as
+`UNMAPPED`). The full NLCS Netbeheer schema defines many more categories (gas, water,
+telecom, MS/LS variants) that real files will contain. As of task 001 the converter
+emits a single merged GeoJSON FeatureCollection per drawing (boundary + all asset
+features together, distinguished by each feature's `category` property) rather than
+grouped or per-category files, so "carried through" below means "included as a feature
+in that one file," not routed to a separate output.
 
 ## Specifications
 
-- Unknown categories are carried through, not dropped: classify them by their GML
-  geometry kind (point/line/polygon) and emit them in the corresponding group CSV and
-  as `cat_<Category>.csv` in per-category mode.
+- Unknown categories are carried through, not dropped: include them as features in the
+  single merged GeoJSON output, with `category` set from the source element tag.
 - Attribute extraction becomes generic: capture all simple-text child elements of a
   feature (current known-attribute mapping stays as the canonical column set; extra
   attributes must at least survive into an extensible representation rather than being

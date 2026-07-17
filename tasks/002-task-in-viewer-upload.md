@@ -29,7 +29,7 @@ Dekart is used unmodified.
   001; schema validation once task 102 exists) and:
   - the drawing's layers appear on the map without a manual page reload, following the
     established per-category layer and styling conventions;
-  - the converted GeoJSON is written to `resources/<drawing-name>/` on disk —
+  - the converted GeoJSON is written to `resources/<drawing-name>.geojson` on disk —
     **write-only**: committing to git remains a manual developer action;
   - conversion errors are shown to the user in readable form; nothing is stored or
     shown for a failed conversion.
