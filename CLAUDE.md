@@ -25,7 +25,11 @@ architectural changes.
   revisions of the same Sterksel project; more real-world files get dropped in here
   over time, e.g. `scholtensteeg.xml`) and the official XSDs. Not every file in this
   folder is necessarily converted into `resources/` yet — check before assuming.
-- `scripts/nlcs2geojson.py` — the converter (only real code so far). Python, needs pyproj.
+- `scripts/nlcs2geojson.py` — the converter. Python, needs pyproj.
+- `scripts/create_report.py` — task 101: converts an XML file and publishes it as a
+  styled Dekart report in one command (imports `nlcs2geojson`, shells out to the
+  `dekart` CLI). Prints the report URL to stdout; see CLAUDE.md's task 101/103 status
+  note below for what it does and doesn't handle.
 - `resources/` — converted map-ready output, one `<name>.geojson` per source file
   (boundary + all asset categories merged into a single FeatureCollection, one file per
   drawing — an owner decision made during task 001, superseding the per-category CSV
@@ -59,6 +63,13 @@ for f in enexis_voorbeeld_3092025_1554 xml_revisie xml_revisie_2; do
   .venv/bin/python scripts/nlcs2geojson.py data/$f.xml resources/$f.geojson
 done
 git diff --quiet resources/ && echo IDENTICAL
+```
+
+Publish a styled Dekart report for one drawing (requires local Dekart running, see
+Dev environment below):
+
+```bash
+.venv/bin/python scripts/create_report.py data/enexis_voorbeeld_3092025_1554.xml
 ```
 
 There is no build, lint, or test suite yet. `index.js`/`package.json` are an empty
@@ -158,21 +169,37 @@ task 001 (2026-07-17) the converter emits one merged GeoJSON per drawing instead
 one-dataset-per-category for a report now requires an extra split step at
 upload/report-build time (task 101), not just uploading converter output directly.
 
-## Task 101 status (as of 2026-07-17): not started, one open fork
+## Task 101 and 103 status (as of 2026-07-17): done
 
-Attempted to start task 101 and paused before writing code — the owner said to stop
-and hold, so **don't pick this up without checking in first**. What used to be a
-second open question (its dependency on discipline-split task `001b`) is resolved:
-that task was renumbered to **108** and moved out of the owner-priority range as
-out-of-scope-for-now, so 101 is no longer blocked on it — build against today's
-single-file-per-drawing shape (like the manually-built `scholtensteeg` report was).
-
-One thing still needs resolving, not just implementing: **the task's own spec
-conflicts with reality.** `tasks/101-task-automate-report-creation.md` still
-describes one Kepler layer per asset category with fixed per-category colors — the
-*original*, now-superseded convention (see above). What the owner has actually been
-using is `dekart/map-style.json`'s shape: one layer per file, single color, category
-as a tooltip field. The task spec itself hasn't been updated to reflect this yet.
+- **103** (converter hardening): `scripts/nlcs2geojson.py` no longer has a fixed
+  `ASSET_CATS` allowlist — any feature with a convertible geometry is included,
+  category is purely descriptive now. Attribute extraction is generic (every
+  simple-text child element survives, snake_cased from its tag name, in addition to
+  the canonical `ATTR_COLS` set). Geometry support extended to `gml:Curve` made of
+  straight `LineStringSegment`s; anything else unconvertible (`Surface`, curved
+  `Curve` segments, empty `Geometry`) is skipped with a per-category, per-reason count
+  in the printed summary — never crashes. Verified via a synthetic edge-case XML
+  (kept only as a scratch file, not committed) covering: a brand-new category with
+  valid geometry, a straight-segment `Curve`, a curved `Curve`, a `Surface`, and a
+  missing `Geometry`. Fixed a factual error this surfaced: `AmantelbuisInhoud` *does*
+  have its own geometry (see Domain notes) — it was only ever excluded by the old
+  allowlist, not because it lacks geometry as previously documented here.
+- **101** (automate report creation): `scripts/create_report.py`. Takes one XML
+  path, converts it (writing to `resources/<name>.geojson`, same as manual usage),
+  publishes it as a new Dekart report styled from `dekart/map-style.json` (dataset id
+  substituted, viewport computed from the data's bounding box), verifies via
+  `dekart snapshot`, and prints the report URL. Always creates a **new** report on
+  every run — no id tracking, so re-running on the same file leaves the old report as
+  a stray (owner's explicit choice: simplicity over avoiding stray-report cleanup).
+  Styling follows `dekart/map-style.json`'s shape (one layer per file, single color,
+  category as a tooltip field), not the original per-category-color design in the
+  task spec — that spec text is now stale/historical, not current behavior.
+  **Bug caught during testing**: the viewport-computation helper returned
+  `(lon, lat, zoom)` but was unpacked as `(lat, lon, zoom)`, silently swapping the
+  two — the first test report pointed the map near the equator off Africa instead of
+  Sterksel. `dekart snapshot` "succeeded" anyway (a swapped-but-valid lat/lon range
+  doesn't error), so this needed an actual visual check of the rendered snapshot to
+  catch, not just a non-crashing exit code — worth remembering as a review reflex.
 
 ## Existing demo reports (local Dekart)
 
@@ -193,18 +220,36 @@ as a tooltip field. The task spec itself hasn't been updated to reflect this yet
 - `d314728f-9a80-4fbc-adca-9104a755c30d` — "scholtensteeg", built by applying
   `dekart/map-style.json` (with dataset-id substitution) to a new upload. Confirms the
   saved style is actually reusable across reports, not just theoretically.
+- `67e2cb5f-c00f-4da1-aa58-3dbb979aa685` — first `scripts/create_report.py` test run,
+  made before the lat/lon swap bug (above) was fixed; map is pointed at the wrong
+  location. Stray, safe to delete via the UI.
+- `1fda9569-93cc-4a37-a79e-bdddc9f14148` — "enexis_voorbeeld_3092025_1554", the
+  corrected `scripts/create_report.py` run; visually verified correct. Kept as
+  evidence task 101 works end-to-end.
+- `6cd6e753-dd9d-4102-bc2f-1e98cd8a532a` and `aad5be4d-210f-4c4c-bd0f-0189ce37a3ca` —
+  `scripts/create_report.py` runs on `xml_revisie`/`xml_revisie_2` (acceptance
+  criteria: "running it on each of the three example files succeeds"). Near-duplicates
+  of the voorbeeld report; safe to delete via the UI if the report list gets noisy.
 
 ## Domain notes worth knowing
 
 - A drawing = one `AprojectReferentie` (project metadata + boundary polygon) plus a
   flat list of asset features. Treat the category set as open-ended (the XSD defines
   far more than the example files contain).
-- `AmantelbuisInhoud` has no geometry of its own — skipping it is correct.
+- `AmantelbuisInhoud` **does** have its own `Geometry` (a `LineString` co-located with
+  its parent `Amantelbuis`'s duct, via a `MantelbuisID` foreign key) — this note used
+  to say the opposite and was wrong; it was only ever excluded by the converter's old
+  fixed category allowlist, which task 103 removed. It represents the cable/pipe
+  actually running inside the duct (see its `Labeltekst`, e.g. `GPLK 4x50Cu`) and is
+  now converted like everything else.
 - LSkast footprints are drawn centimetre-scale; they are invisible until zoomed far
   in. That is the data, not a bug.
 - Example-file ground truth (used as conversion sanity checks): voorbeeld = 293 line
   features (286 LSkabel, 6 MSkabel, 1 Amantelbuis), 486 points, 7 area features,
-  ~7.9 km total cable length, located in Sterksel (Noord-Brabant).
+  ~7.9 km total cable length, located in Sterksel (Noord-Brabant). As of task 103
+  (open-ended categories), the converted output also includes 2 `AmantelbuisInhoud`
+  line features on top of that — 789 total features in `resources/
+  enexis_voorbeeld_3092025_1554.geojson`, not 787.
 - The converter's known-category allowlist (`ASSET_CATS` in `scripts/nlcs2geojson.py`)
   is manually maintained and **will have gaps on real-world files** — the three
   original Enexis examples are electricity-only and don't exercise most of the

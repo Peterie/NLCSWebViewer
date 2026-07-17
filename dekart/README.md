@@ -30,8 +30,18 @@ report happened to be looking when it was saved.
 
 ## Reapplying it to a new report
 
-There's no CLI tool yet that does this automatically (that's what task 101 is for).
-For now: give the target report id to whoever/whatever is driving the `dekart` CLI,
-resolve that report's actual dataset ids via `get_report_properties`, substitute
-those ids into a copy of this file's `layers[*].config.dataId` and the
-`fieldsToShow` keys, and push the result with `update_report_map_config`.
+`scripts/create_report.py` (task 101) automates this now: it takes an NLCS++ XML
+file, converts it, uploads it, applies this style with a freshly substituted
+dataset id, computes a viewport that fits the drawing, verifies via snapshot, and
+prints the report URL. Run `.venv/bin/python scripts/create_report.py <xml file>`.
+
+It always creates a **new** report — there's no id tracking to update an existing
+one, so re-running it on the same file leaves the old report behind (clean up via
+the Dekart UI; see CLAUDE.md's Dekart CLI pitfalls).
+
+For anything the script doesn't cover (e.g. manually tweaking a report already in
+the UI), the manual process is still: give the target report id to whoever/whatever
+is driving the `dekart` CLI, resolve that report's actual dataset ids via
+`get_report_properties`, substitute those ids into a copy of this file's
+`layers[*].config.dataId` and the `fieldsToShow` keys, and push the result with
+`update_report_map_config`.
