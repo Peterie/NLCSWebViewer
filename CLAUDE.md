@@ -157,23 +157,21 @@ task 001 (2026-07-17) the converter emits one merged GeoJSON per drawing instead
 one-dataset-per-category for a report now requires an extra split step at
 upload/report-build time (task 101), not just uploading converter output directly.
 
-## Task 101 status (as of 2026-07-17): not started, two open forks
+## Task 101 status (as of 2026-07-17): not started, one open fork
 
 Attempted to start task 101 and paused before writing code — the owner said to stop
-and hold, so **don't pick this up without checking in first**. Two things need
-resolving, not just implementing:
+and hold, so **don't pick this up without checking in first**. What used to be a
+second open question (its dependency on discipline-split task `001b`) is resolved:
+that task was renumbered to **108** and moved out of the owner-priority range as
+out-of-scope-for-now, so 101 is no longer blocked on it — build against today's
+single-file-per-drawing shape (like the manually-built `scholtensteeg` report was).
 
-1. **Its listed dependency, task 001b (split GeoJSON by discipline), isn't
-   implemented.** `resources/` still holds one merged file per drawing, not one file
-   per discipline. Whoever starts 101 needs to decide: build against today's
-   single-file shape (like the manually-built `scholtensteeg` report was), or do 001b
-   first.
-2. **The task's own spec conflicts with reality.** `tasks/101-task-automate-report-
-   creation.md` still describes one Kepler layer per asset category with fixed
-   per-category colors — the *original*, now-superseded convention (see above). What
-   the owner has actually been using is `dekart/map-style.json`'s shape: one layer per
-   file, single color, category as a tooltip field. The task spec itself hasn't been
-   updated to reflect this yet.
+One thing still needs resolving, not just implementing: **the task's own spec
+conflicts with reality.** `tasks/101-task-automate-report-creation.md` still
+describes one Kepler layer per asset category with fixed per-category colors — the
+*original*, now-superseded convention (see above). What the owner has actually been
+using is `dekart/map-style.json`'s shape: one layer per file, single color, category
+as a tooltip field. The task spec itself hasn't been updated to reflect this yet.
 
 ## Existing demo reports (local Dekart)
 
