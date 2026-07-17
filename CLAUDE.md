@@ -21,14 +21,23 @@ architectural changes.
   specs** (no versions, APIs, schemas, code, or config in these docs; naming products
   is fine). English prose with Dutch domain terms (LSkabel, mof, netbeheerder) kept
   as-is.
-- `data/` — example NLCS++ files (one voorbeeld + two near-identical revisions of the
-  same Sterksel project) and the official XSDs.
+- `data/` — example NLCS++ files (started as one voorbeeld + two near-identical
+  revisions of the same Sterksel project; more real-world files get dropped in here
+  over time, e.g. `scholtensteeg.xml`) and the official XSDs. Not every file in this
+  folder is necessarily converted into `resources/` yet — check before assuming.
 - `scripts/nlcs2geojson.py` — the converter (only real code so far). Python, needs pyproj.
 - `resources/` — converted map-ready output, one `<name>.geojson` per source file
   (boundary + all asset categories merged into a single FeatureCollection, one file per
   drawing — an owner decision made during task 001, superseding the per-category CSV
   split used for the very first demo). **Must remain byte-identically reproducible**
   from the converter (see below).
+- `dekart/` — captured Dekart report config: `map-style.json` (a real `map_config` the
+  owner hand-tuned in the UI, saved so it can be reapplied to new reports) and a
+  `README.md` explaining what's portable vs report-specific in it. Treat this as the
+  **current source of truth for styling**, ahead of prose descriptions elsewhere.
+- `README.md` — human-facing operational steps (currently: how to run the local Dekart
+  server). `CLAUDE.md` (this file) is guidance for Claude Code; keep the two in sync
+  where they overlap rather than letting one go stale.
 - `tasks/` — the roadmap. `overview.md` lists all tasks; numbers 0–100 are reserved
   for the project owner and are done **before** 101+. Task specs are deliberately
   stack-agnostic; the stack is chosen when a task is picked up.
@@ -116,6 +125,18 @@ The dev machine has **no sudo and no Docker**. Everything runs rootless:
 
 ## Established map conventions
 
+**Superseded — see `dekart/map-style.json` for the actual current style.** The
+paragraph below describes the *original* per-category-color convention from the very
+first CSV-based demo. It is not what's actually in use anymore: the owner has since
+hand-configured reports with a *different* style (one layer per whole file, single
+fixed color per layer, `category` shown only as a tooltip field, not a color channel)
+and had that captured as the reusable `dekart/map-style.json`. Keeping the old prose
+here for history/context, but don't implement against it — implement against the
+JSON.
+
+<details>
+<summary>Original (superseded) convention</summary>
+
 One layer per asset category, fixed colors identical across drawings: LSkabel orange,
 MSkabel blue-grey, Amantelbuis teal, LSmof pink, LSoverdrachtspunt green,
 OVLoverdrachtspunt yellow, LSkast/MSstation red tones, project boundary (Grens) blue
@@ -128,11 +149,31 @@ others hidden). This is a workaround, not the desired UX — tasks 002–004 rep
 with real file/object-type toggles on a platform chosen in task 002 (custom viewer vs
 Dekart fork; stock Dekart has no UI extension points).
 
+</details>
+
 This convention was established using the old per-category CSV/GeoJSON files. As of
 task 001 (2026-07-17) the converter emits one merged GeoJSON per drawing instead
 (`resources/<name>.geojson`, all categories in one FeatureCollection); getting back to
 one-dataset-per-category for a report now requires an extra split step at
 upload/report-build time (task 101), not just uploading converter output directly.
+
+## Task 101 status (as of 2026-07-17): not started, two open forks
+
+Attempted to start task 101 and paused before writing code — the owner said to stop
+and hold, so **don't pick this up without checking in first**. Two things need
+resolving, not just implementing:
+
+1. **Its listed dependency, task 001b (split GeoJSON by discipline), isn't
+   implemented.** `resources/` still holds one merged file per drawing, not one file
+   per discipline. Whoever starts 101 needs to decide: build against today's
+   single-file shape (like the manually-built `scholtensteeg` report was), or do 001b
+   first.
+2. **The task's own spec conflicts with reality.** `tasks/101-task-automate-report-
+   creation.md` still describes one Kepler layer per asset category with fixed
+   per-category colors — the *original*, now-superseded convention (see above). What
+   the owner has actually been using is `dekart/map-style.json`'s shape: one layer per
+   file, single color, category as a tooltip field. The task spec itself hasn't been
+   updated to reflect this yet.
 
 ## Existing demo reports (local Dekart)
 
@@ -147,6 +188,12 @@ upload/report-build time (task 101), not just uploading converter output directl
 - Two throwaway debug reports from diagnosing the `mapState` crash (a small-subset
   GeoJSON test and a small CSV+WKT test) are safe to delete via the UI; their ids
   weren't kept since they carry no lasting value.
+- `735d42c7-fba5-40d0-9e9d-a3b382403ddd` — the report the owner hand-styled in the
+  Dekart UI; `dekart/map-style.json` is a snapshot of this report's `map_config`.
+  Treat this report as **live/owned by the user** — don't overwrite its config.
+- `d314728f-9a80-4fbc-adca-9104a755c30d` — "scholtensteeg", built by applying
+  `dekart/map-style.json` (with dataset-id substitution) to a new upload. Confirms the
+  saved style is actually reusable across reports, not just theoretically.
 
 ## Domain notes worth knowing
 
@@ -159,3 +206,13 @@ upload/report-build time (task 101), not just uploading converter output directl
 - Example-file ground truth (used as conversion sanity checks): voorbeeld = 293 line
   features (286 LSkabel, 6 MSkabel, 1 Amantelbuis), 486 points, 7 area features,
   ~7.9 km total cable length, located in Sterksel (Noord-Brabant).
+- The converter's known-category allowlist (`ASSET_CATS` in `scripts/nlcs2geojson.py`)
+  is manually maintained and **will have gaps on real-world files** — the three
+  original Enexis examples are electricity-only and don't exercise most of the
+  schema. Case in point: `MSmof` (medium-voltage cable joint, the obvious MS
+  counterpart of the already-handled `LSmof`) was missing until the new
+  `scholtensteeg.xml` example surfaced it via `UNMAPPED:MSmof` in the conversion
+  summary. When adding a new example file, always check the printed `UNMAPPED:*`
+  counts for categories that clearly pair with an existing one before assuming
+  task 103 is the only place to fix this — an obvious 1:1 pairing (like `LSmof` /
+  `MSmof`) is a same-session fix, not a task-103-only concern.
