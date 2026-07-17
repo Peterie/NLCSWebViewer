@@ -1,4 +1,10 @@
-# 003 — Layer selector: file toggles + object-type buttons
+# 110 — Layer selector: file toggles + object-type buttons
+
+## Status: Not started (deprioritized)
+
+Originally scoped as an owner-priority task (`003`); moved to this number and out
+of the reserved range as out-of-scope-for-now. Spec unchanged, just deprioritized —
+see tasks/overview.md's Reserved range note.
 
 ## Goal
 
@@ -11,7 +17,7 @@ type across all files at once.
 The multi-file demo report exposes 27 individual layers (3 files × 9 categories) in
 Kepler's stock layer panel; hiding one file means clicking nine eye icons. The
 desired model treats *file* and *object type* as two independent dimensions. This
-runs on the platform chosen in task 002 (custom viewer or Dekart fork).
+runs on the platform chosen in task 109 (custom viewer or Dekart fork).
 
 ## Specifications
 
@@ -24,7 +30,7 @@ runs on the platform chosen in task 002 (custom viewer or Dekart fork).
   AND its object-type toggle is on**. Turning a dimension off and on again restores
   the previous state of the other dimension (no state loss).
 - The set of files and categories is derived from what is actually loaded — nothing
-  hard-coded; a newly added drawing (task 002) appears with its toggle automatically,
+  hard-coded; a newly added drawing (task 109) appears with its toggle automatically,
   and a category present in only one file still gets a type button.
 - Each control shows its identity clearly (file label; category name with its
   established color as a swatch).
@@ -43,9 +49,9 @@ runs on the platform chosen in task 002 (custom viewer or Dekart fork).
 
 ## Dependencies
 
-Task 002 (platform decision and viewer to build on).
+Task 109 (platform decision and viewer to build on).
 
 ## Out of scope
 
-- Object-level selection/search (task 004).
+- Object-level selection/search (task 111).
 - Per-layer styling controls beyond visibility.

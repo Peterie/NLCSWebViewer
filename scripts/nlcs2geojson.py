@@ -9,15 +9,25 @@ Usage:
     .venv/bin/python scripts/nlcs2geojson.py data/enexis_voorbeeld_3092025_1554.xml out/enexis_voorbeeld_3092025_1554.geojson
 
 Emits one GeoJSON FeatureCollection per drawing, containing every feature in the
-file: the project boundary (AprojectReferentie) and all recognized asset categories
-(LSkabel, MSkabel, Amantelbuis, LSmof, LSoverdrachtspunt, OVLoverdrachtspunt, LSkast,
-MSstation), distinguished by each feature's `category` property.
+file: the project boundary (AprojectReferentie) and every other feature that has a
+convertible geometry, distinguished by each feature's `category` property. The
+category set is open-ended (per docs/spec/02-nlcs-data-format.md) — nothing is
+filtered by category name, only by whether its geometry can be converted.
 
-Feature categories outside that set are counted as UNMAPPED and skipped, as are
-features without geometry (e.g. AmantelbuisInhoud).
+Each feature's `properties` always carries the canonical attribute set (category,
+handle, status, bedrijfstoestand, functie, subnettype, eigenaar, beheerder,
+datum_aanleg, netgekoppeld, bovengronds, asset_id, feature_id), plus any other
+simple-text child element the source feature has, snake_cased from its XML tag name
+(e.g. `<Kabelopbouw>` -> `kabelopbouw`) — nothing is silently dropped.
+
+Features without a `<Geometry>` element (e.g. AmantelbuisInhoud) are skipped, as are
+features whose geometry uses a GML construct this converter can't convert (skipped,
+never crashes the run). Every skip is counted and reported per category in the
+conversion summary printed to stdout.
 """
 
 import json
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -28,12 +38,6 @@ NS = {"n": "NS_NLCSnetbeheer", "gml": "http://www.opengis.net/gml/3.2"}
 TX = Transformer.from_crs("EPSG:28992", "EPSG:4326", always_xy=True)
 
 COORD_PRECISION = 7
-
-ASSET_CATS = {
-    "LSkabel", "MSkabel", "Amantelbuis",
-    "LSmof", "MSmof", "LSoverdrachtspunt", "OVLoverdrachtspunt",
-    "LSkast", "MSstation",
-}
 
 ATTR_COLS = [
     "category", "handle", "status", "bedrijfstoestand", "functie",
@@ -48,6 +52,15 @@ ATTR_MAP = {
     "AssetId": "asset_id", "ID": "feature_id",
 }
 
+_SNAKE_RE1 = re.compile(r"(.)([A-Z][a-z]+)")
+_SNAKE_RE2 = re.compile(r"([a-z0-9])([A-Z])")
+
+
+def snake_case(tag):
+    s = _SNAKE_RE1.sub(r"\1_\2", tag)
+    s = _SNAKE_RE2.sub(r"\1_\2", s)
+    return s.lower()
+
 
 def parse_coords(text, dim):
     vals = text.split()
@@ -60,6 +73,7 @@ def fmt(pts):
 
 
 def geometry_geojson(geom_el):
+    """Returns (geometry, None) on success, or (None, reason) if unconvertible."""
     for tag, kind in (("Point", "Point"), ("LineString", "LineString"), ("Polygon", "Polygon")):
         g = geom_el.find(f"gml:{tag}", NS)
         if g is None:
@@ -67,14 +81,54 @@ def geometry_geojson(geom_el):
         dim = int(g.get("srsDimension", "2"))
         if kind == "Point":
             pts = parse_coords(g.find("gml:pos", NS).text, dim)
-            return {"type": "Point", "coordinates": fmt(pts)[0]}
+            return {"type": "Point", "coordinates": fmt(pts)[0]}, None
         if kind == "LineString":
             pts = parse_coords(g.find("gml:posList", NS).text, dim)
-            return {"type": "LineString", "coordinates": fmt(pts)}
+            return {"type": "LineString", "coordinates": fmt(pts)}, None
         ring = g.find("gml:exterior/gml:LinearRing/gml:posList", NS)
         pts = parse_coords(ring.text, dim)
-        return {"type": "Polygon", "coordinates": [fmt(pts)]}
-    return None
+        return {"type": "Polygon", "coordinates": [fmt(pts)]}, None
+
+    curve = geom_el.find("gml:Curve", NS)
+    if curve is not None:
+        segment_parent = curve.find("gml:segments", NS)
+        segments = list(segment_parent) if segment_parent is not None else []
+        if segments and all(s.tag.endswith("LineStringSegment") for s in segments):
+            pts = []
+            for seg in segments:
+                dim = int(seg.get("srsDimension", "2"))
+                seg_pts = parse_coords(seg.find("gml:posList", NS).text, dim)
+                if pts and seg_pts and pts[-1] == seg_pts[0]:
+                    pts.extend(seg_pts[1:])
+                else:
+                    pts.extend(seg_pts)
+            return {"type": "LineString", "coordinates": fmt(pts)}, None
+        return None, "Curve (non-straight segments)"
+
+    children = list(geom_el)
+    if not children:
+        return None, "empty"
+    return None, children[0].tag.split("}")[-1]
+
+
+def extract_properties(cat, feat):
+    row = {"category": cat}
+    extra = {}
+    for child in feat:
+        tag = child.tag.split("}")[-1]
+        if tag == "Geometry" or list(child):
+            continue
+        text = (child.text or "").strip()
+        if not text:
+            continue
+        mapped = ATTR_MAP.get(tag)
+        if mapped:
+            row[mapped] = text
+        else:
+            extra[snake_case(tag)] = text
+    props = {c: row.get(c, "") for c in ATTR_COLS}
+    props.update(extra)
+    return props
 
 
 def main(xml_path, out_path):
@@ -84,16 +138,21 @@ def main(xml_path, out_path):
 
     features = []
     counts = {}
-    skipped = 0
+    skip_counts = {}
+
+    def record_skip(cat, reason):
+        key = (cat, reason)
+        skip_counts[key] = skip_counts.get(key, 0) + 1
+
     for feat in root:
         cat = feat.tag.split("}")[-1]
         geom_el = feat.find("n:Geometry", NS)
         if geom_el is None:
-            skipped += 1
+            record_skip(cat, "no_geometry_element")
             continue
-        geometry = geometry_geojson(geom_el)
+        geometry, reason = geometry_geojson(geom_el)
         if geometry is None:
-            skipped += 1
+            record_skip(cat, f"unsupported_geometry:{reason}")
             continue
         if cat == "AprojectReferentie":
             get = lambda k: (feat.findtext(f"n:{k}", "", NS) or "").strip()
@@ -107,25 +166,21 @@ def main(xml_path, out_path):
             features.append({"type": "Feature", "geometry": geometry, "properties": props})
             counts[cat] = counts.get(cat, 0) + 1
             continue
-        if cat not in ASSET_CATS:
-            skipped += 1
-            counts[f"UNMAPPED:{cat}"] = counts.get(f"UNMAPPED:{cat}", 0) + 1
-            continue
-        row = {"category": cat}
-        for child in feat:
-            key = ATTR_MAP.get(child.tag.split("}")[-1])
-            if key and child.text:
-                row[key] = child.text.strip()
-        props = {c: row.get(c, "") for c in ATTR_COLS}
+        props = extract_properties(cat, feat)
         features.append({"type": "Feature", "geometry": geometry, "properties": props})
         counts[cat] = counts.get(cat, 0) + 1
 
     with open(out, "w", encoding="utf-8") as f:
         json.dump({"type": "FeatureCollection", "features": features}, f, ensure_ascii=False)
 
-    for k in sorted(counts):
-        print(f"{k}: {counts[k]}")
-    print(f"skipped (no geometry): {skipped}")
+    for cat in sorted(set(counts) | {c for c, _ in skip_counts}):
+        converted = counts.get(cat, 0)
+        skips = {reason: n for (c, reason), n in skip_counts.items() if c == cat}
+        line = f"{cat}: {converted} converted"
+        if skips:
+            detail = ", ".join(f"{reason}={n}" for reason, n in sorted(skips.items()))
+            line += f" | skipped: {detail}"
+        print(line)
 
 
 if __name__ == "__main__":

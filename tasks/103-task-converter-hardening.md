@@ -1,5 +1,17 @@
 # 103 — Converter hardening
 
+## Status: Done (2026-07-17)
+
+Implemented in `scripts/nlcs2geojson.py`: the `ASSET_CATS` allowlist is gone (any
+feature with convertible geometry is included), attribute extraction is generic
+(snake_cased simple-text child elements, on top of the canonical set), and geometry
+support extends to straight-segment `gml:Curve` — anything else unconvertible is
+skipped with a per-category, per-reason count instead of crashing. Verified with a
+synthetic edge-case XML (scratch file, not committed) and by regenerating
+`resources/` for all four example files. Surfaced and fixed a factual error in
+CLAUDE.md's domain notes: `AmantelbuisInhoud` does have its own geometry; it was
+only ever excluded by the old allowlist.
+
 ## Goal
 
 Make `scripts/nlcs2geojson.py` robust for real-world NLCS++ input: treat asset categories

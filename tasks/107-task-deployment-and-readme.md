@@ -1,5 +1,15 @@
 # 107 — Deployment & README
 
+## Status: Not started
+
+A `README.md` already exists at repo root, but it only covers one slice of this
+spec (how to start/stop/restart the local udocker-based Dekart server) — added
+ad hoc when asked, not as this task. Still missing: the repository-layout section,
+quick-start pointer, dekart CLI install/init steps, pipeline usage (converter +
+task-101 command), task 104 docs (task 104 doesn't exist yet either), and the
+"verified on a clean checkout" requirement. Whoever picks this up should build on
+the existing README rather than starting from scratch.
+
 ## Goal
 
 Anyone with the repo can get the whole system running locally from written

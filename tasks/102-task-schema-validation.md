@@ -1,5 +1,7 @@
 # 102 — Schema validation
 
+## Status: Not started
+
 ## Goal
 
 Validate an NLCS++ XML file against the official schema before conversion, rejecting

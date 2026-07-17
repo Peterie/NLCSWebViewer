@@ -1,5 +1,14 @@
 # 001 — GeoJSON as conversion target
 
+## Status: Done (2026-07-17)
+
+Implemented as a single merged GeoJSON per drawing (not the grouped/per-category
+split originally spec'd below — an owner decision made mid-implementation; see task
+108 for the discipline-based split that was carved out of this task afterward).
+`scripts/nlcs2csv.py` renamed to `scripts/nlcs2geojson.py`; `resources/` holds one
+flat `<name>.geojson` per source file. Verified end-to-end by uploading to local
+Dekart and confirming render + tooltips.
+
 ## Goal
 
 Replace CSV with **GeoJSON** as the output format of the conversion pipeline. The
@@ -13,7 +22,7 @@ column — chosen for the first demo because Dekart's CSV upload was the shortes
 GeoJSON is the more natural interchange format for this data: geometry is first-class
 (no WKT-in-a-string), properties are typed, and it is the lingua franca of web map
 tooling (Kepler.gl, MapLibre, QGIS) — which matters for the custom viewer work in
-tasks 002–004.
+tasks 109–111.
 
 ## Specifications
 
@@ -59,5 +68,5 @@ None — first of the owner-priority tasks.
 
 ## Out of scope
 
-- Viewer/UI work (tasks 002–004).
+- Viewer/UI work (tasks 109–111).
 - Changing which attributes are extracted (task 103).
