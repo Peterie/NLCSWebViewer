@@ -2,44 +2,47 @@
 
 ## Design principle
 
-The architecture is split into two decoupled halves joined by a data store:
+The architecture is split into two decoupled halves joined by a store of converted drawings:
 
-- **Ingestion** (this project's own work): everything needed to turn an uploaded NLCS++ file
-  into clean, georeferenced records in a spatial data source.
-- **Visualization** (off-the-shelf): Dekart, which queries that data source and renders
-  interactive maps. Dekart is used as-is; no part of the design depends on modifying it.
+- **Ingestion**: everything needed to turn an uploaded NLCS++ file into clean, georeferenced,
+  map-ready drawing data.
+- **Visualization**: the project's own map viewer — a web application built on an open-source
+  web-mapping library (MapLibre GL JS) — which reads that converted data and renders
+  interactive maps.
 
-The data store in the middle is deliberately left abstract: it is **any Dekart-supported data
-source with geospatial support** (a relational database with a spatial extension, such as
-PostgreSQL/PostGIS, or a cloud data warehouse). The architecture only requires that it can
-store geometry alongside attributes and answer Dekart's queries; the concrete product is an
-implementation choice.
+Both halves are this project's own work. The visualization half was originally planned as
+off-the-shelf Dekart, used unmodified; that changed with the platform decision recorded in
+the task roadmap (task 002): the interface needs custom controls (in-viewer upload, layer
+selection per drawing and per object type, object search) that an off-the-shelf tool does not
+offer, and a custom viewer owns the whole UI. Dekart remains usable alongside for ad-hoc
+analysis, but nothing in the design depends on it.
 
-Dekart also accepts direct uploads of common map-ready geodata files through its own
-interface. That opens a second, lighter way to join the two halves — see
-[Hand-off variants](#hand-off-variants) below — but it does not change the split: NLCS++
-never reaches Dekart unconverted.
+The store in the middle is deliberately simple: **map-ready drawing files** (one converted
+file per drawing, geometry plus attributes in web-map coordinates) that the viewer reads.
+The architecture only requires that a drawing's assets can be stored, listed, replaced, and
+read as a unit; a shared spatial database remains a possible future evolution — see
+[Future considerations](#future-considerations).
 
 ## Component view
 
 ```mermaid
 flowchart TD
-    subgraph ingestion ["Ingestion (project scope)"]
+    subgraph ingestion ["Ingestion"]
         upload["Upload interface<br/><i>receive file, report progress & errors</i>"]
         pipeline["Conversion pipeline<br/><i>parse · validate · transform · load</i>"]
     end
 
-    store[("Spatial data source<br/><i>georeferenced asset records</i>")]
+    store[("Converted drawings<br/><i>map-ready files, one per drawing</i>")]
 
-    subgraph viewing ["Visualization (off-the-shelf)"]
-        dekart["Dekart<br/><i>queries data, renders maps, shares reports</i>"]
+    subgraph viewing ["Visualization"]
+        viewer["Map viewer<br/><i>renders drawings, layer toggles, asset inspection</i>"]
     end
 
     user(["User"]) --> upload
     upload --> pipeline
     pipeline --> store
-    dekart --> store
-    user --> dekart
+    viewer --> store
+    user --> viewer
 ```
 
 ### Upload interface
@@ -49,11 +52,11 @@ The user-facing entry point of the ingestion half. Responsibilities:
 - Accept an NLCS++ file from a user (files are large but not huge — hundreds of kilobytes to
   a few megabytes).
 - Give immediate, human-readable feedback: accepted, rejected (and why), processing, done.
-- Hand the file to the conversion pipeline and, on success, point the user to where the
-  drawing can be viewed.
+- Hand the file to the conversion pipeline and, on success, show the drawing in the viewer.
 
-This can be a minimal web page or even a command-line step in a first iteration; its contract
-is "file in, viewable drawing out", not any particular interface style.
+Its home is the viewer itself (an in-viewer upload control, per the task roadmap); a
+command-line step serves the same contract in a first iteration. The contract is "file in,
+viewable drawing out", not any particular interface style.
 
 ### Conversion pipeline
 
@@ -68,24 +71,22 @@ The heart of the system. It performs four conceptual steps, in order:
 3. **Transform** — convert geometry from Dutch RD coordinates to WGS84 (handling both the
    planar and the with-height variants), and flatten each feature into a record: geometry +
    asset category + attributes + the project it belongs to.
-4. **Load** — write the records into the spatial data source, grouped under the uploaded
-   drawing, so that one drawing's assets can be queried (and later deleted or replaced) as a
-   unit. Re-uploading the same drawing replaces its previous content rather than duplicating
-   it. In the file hand-off variant the destination is a map-ready file instead — see
-   [Hand-off variants](#hand-off-variants).
+4. **Load** — write the converted drawing to the store as a unit, so that one drawing can be
+   listed, read, and later deleted or replaced as a whole. Re-uploading the same drawing
+   replaces its previous content rather than duplicating it.
 
-### Spatial data source
+### Converted drawings store
 
-Holds the converted drawings. Conceptually it stores, per uploaded drawing: the project
-reference (metadata + boundary), and one record per asset feature (category, geometry,
-attributes). It is the integration point between the two halves in the primary design —
-Dekart never sees an NLCS++ file, and the pipeline never talks to Dekart directly.
+Holds the converted drawings: per uploaded drawing, the project reference (metadata +
+boundary) and one feature per asset (category, geometry, attributes), together in one
+map-ready file. It is the integration point between the two halves — the viewer never sees
+an NLCS++ file, and the pipeline never talks to the viewer directly.
 
-### Dekart
+### Map viewer
 
-Provides everything map-related: query-driven layers, rendering (via Kepler.gl), interactive
-exploration, and shareable map reports. How drawings are presented in Dekart is described in
-[04-visualization-with-dekart.md](04-visualization-with-dekart.md).
+Provides everything map-related: rendering the drawings as layered interactive maps,
+toggling what is visible, and inspecting any asset's attributes. How drawings are presented
+is described in [04-visualization.md](04-visualization.md).
 
 ## Data flow: from file to map
 
@@ -94,8 +95,8 @@ sequenceDiagram
     actor U as User
     participant UP as Upload interface
     participant CP as Conversion pipeline
-    participant DS as Spatial data source
-    participant DK as Dekart
+    participant DS as Converted drawings
+    participant VW as Map viewer
 
     U->>UP: upload NLCS++ file
     UP->>CP: hand over file
@@ -104,60 +105,38 @@ sequenceDiagram
         CP-->>U: rejection with actionable error
     else file valid
         CP->>CP: transform coordinates, flatten features
-        CP->>DS: load drawing (project + assets)
+        CP->>DS: store drawing (project + assets)
         CP-->>U: done — drawing is viewable
-        U->>DK: open the drawing's map
-        DK->>DS: query project boundary & assets
-        DK-->>U: interactive map
+        U->>VW: open the drawing's map
+        VW->>DS: read project boundary & assets
+        VW-->>U: interactive map
     end
 ```
 
 Narratively: the user uploads a file and either gets a clear rejection or, within moments, a
-confirmation that the drawing is viewable. Opening the map in Dekart runs queries against the
-data source — typically one query per asset category, so that cables, joints, cabinets, and
-stations arrive as separate map layers — plus the project boundary as an orientation layer
-that frames the initial view.
-
-## Hand-off variants
-
-The two halves can be joined in two ways. Both keep the conversion pipeline unchanged — they
-differ only in where the Load step delivers its output.
-
-- **Shared spatial data source (primary design).** The pipeline loads records into a data
-  source that Dekart queries. Drawings accumulate centrally, remain queryable across uploads,
-  and drawing lifecycle (listing, replacing, deleting) has a natural home. This is the
-  variant shown in the component view and data flow above.
-- **Map-ready file hand-off (lightweight variant).** Dekart lets users upload common
-  map-ready geodata files (such as GeoJSON) directly in its interface. The pipeline can
-  therefore also emit a converted, WGS84, attribute-carrying file that the user uploads into
-  Dekart by hand. No shared database is needed, which makes this attractive for a first
-  iteration or ad-hoc use — at the cost of an extra manual step per drawing, no central
-  drawing inventory, and no queries across drawings.
-
-A first iteration can start with the file hand-off and grow into the shared data source
-without reworking the pipeline: only the Load step's destination changes.
+confirmation that the drawing is viewable. Opening the map shows the drawing's assets as
+separate layers — cables, joints, cabinets, and stations each toggleable on their own — plus
+the project boundary as an orientation layer that frames the initial view.
 
 ## Deployment context
 
-All components are self-hostable and run as independent services:
+The system is self-hostable and deliberately small:
 
 ```mermaid
 flowchart LR
     subgraph host ["Self-hosted environment"]
-        ing["Ingestion service(s)<br/>(upload + pipeline)"]
-        db[("Spatial data source")]
-        dk["Dekart service"]
+        app["Viewer service<br/>(serves the viewer, the converted drawings,<br/>and the conversion pipeline)"]
+        files[("Converted drawing files")]
     end
-    browser(["User's browser"]) --> ing
-    browser --> dk
-    ing --> db
-    dk --> db
+    browser(["User's browser"]) --> app
+    app --> files
 ```
 
-- Dekart ships as a single self-contained service and is deployed unmodified.
-- The ingestion half is this project's deliverable; whether upload and pipeline are one
-  service or two is an implementation choice.
-- The spatial data source is shared infrastructure between the two halves.
+- One service serves the viewer application and the converted drawings, and runs the
+  conversion pipeline for uploads; whether upload and pipeline ever split into their own
+  service is an implementation choice.
+- Utility network data is sensitive; self-hosting keeps the whole stack inside the
+  organisation's own environment, with the organisation's own authentication in front of it.
 
 No further deployment detail (sizing, networking, configuration) belongs in this document.
 
@@ -166,10 +145,14 @@ No further deployment detail (sizing, networking, configuration) belongs in this
 Not designed for now, but the architecture should not make them impossible:
 
 - **Revision comparison.** The repository already holds two revisions of the same example
-  drawing. Because the pipeline stores each uploaded drawing as its own unit with full
-  attributes (including *Status*), comparing two uploads of the same project — or simply
-  colouring by status on a revision drawing — is a natural extension on the visualization
-  side, requiring no change to the ingestion design.
+  drawing. Because each uploaded drawing is stored as its own unit with full attributes
+  (including *Status*), comparing two uploads of the same project — or simply colouring by
+  status on a revision drawing — is a natural extension on the visualization side, requiring
+  no change to the ingestion design.
+- **A shared spatial database.** If drawings must accumulate centrally and be queryable
+  across uploads (cross-drawing questions, multi-user inventories), the Load step's
+  destination can become a spatial database without reworking the pipeline; the viewer would
+  then read from a query service instead of files.
 - **Automated ingestion.** The pipeline is deliberately separated from the upload interface;
   a batch or system-to-system trigger can feed the same pipeline later.
 - **Multiple grid operators.** The example data is Enexis-flavoured (grid operators refine

@@ -6,14 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 NLCSWebViewer makes **NLCS++ files** (the NLCS Netbeheer XML exchange format used by
 Dutch grid operators; GML 3.2-based, schema in `data/NLCS_Netbeheer.xsd`) viewable on
-an interactive web map using [Dekart](https://dekart.xyz) / Kepler.gl.
+an interactive web map using the project's **own viewer**: a MapLibre GL JS frontend
+(`frontend/`) served by a FastAPI backend (`backend/`). This custom viewer replaced
+Dekart as the display platform (platform decision recorded in
+`tasks/002-task-in-viewer-upload.md`, 2026-07-17); Dekart remains available on the dev
+machine for ad-hoc analysis only.
 
-The single load-bearing architectural fact: **Dekart cannot read NLCS++ XML** — it
-only visualizes query results and uploaded map-ready geodata files. Everything in this
-repo exists to bridge that gap: parse the XML, transform Dutch RD coordinates
-(EPSG:28992 / EPSG:7415 planar part) to WGS84, and deliver map-ready output that
-Dekart renders. Read `docs/spec/01-overview.md` → `03-system-architecture.md` before
-architectural changes.
+The single load-bearing architectural fact: **nothing renders NLCS++ XML directly**.
+Everything in this repo exists to bridge that gap: parse the XML, transform Dutch RD
+coordinates (EPSG:28992 / EPSG:7415 planar part) to WGS84, and deliver map-ready
+GeoJSON that the viewer renders. Read `docs/spec/01-overview.md` →
+`03-system-architecture.md` before architectural changes.
 
 ## Repository layout
 
@@ -23,7 +26,11 @@ architectural changes.
   as-is.
 - `data/` — example NLCS++ files (one voorbeeld + two near-identical revisions of the
   same Sterksel project) and the official XSDs.
-- `scripts/nlcs2geojson.py` — the converter (only real code so far). Python, needs pyproj.
+- `scripts/nlcs2geojson.py` — the converter. Python, needs pyproj.
+- `backend/` — FastAPI app: lists/serves `resources/*.geojson` under `/api/drawings`
+  and serves the built frontend from `out/frontend` when present.
+- `frontend/` — the viewer: vanilla JS + Vite + maplibre-gl. Category styling lives in
+  `frontend/src/categories.js` (the canonical color table, see map conventions below).
 - `resources/` — converted map-ready output, one `<name>.geojson` per source file
   (boundary + all asset categories merged into a single FeatureCollection, one file per
   drawing — an owner decision made during task 001, superseding the per-category CSV
@@ -35,12 +42,37 @@ architectural changes.
 
 ## Commands
 
-Converter (venv with pyproj required; no system pip on the dev machine — use venv):
+Setup (no system pip on the dev machine — use venv):
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt
+python3 -m venv .venv
+.venv/bin/pip install -r scripts/requirements.txt -r backend/requirements.txt
+cd frontend && npm install
+```
+
+Converter:
+
+```bash
 .venv/bin/python scripts/nlcs2geojson.py data/enexis_voorbeeld_3092025_1554.xml out/enexis_voorbeeld_3092025_1554.geojson
 ```
+
+Viewer — production mode (one server):
+
+```bash
+cd frontend && npm run build        # → out/frontend (gitignored)
+.venv/bin/uvicorn backend.app:app --port 8010   # serves app + API on :8010
+```
+
+Viewer — dev mode (hot reload; Vite proxies /api to :8010):
+
+```bash
+.venv/bin/uvicorn backend.app:app --reload --port 8010   # terminal 1
+cd frontend && npm run dev                                # terminal 2
+```
+
+Ports on this shared dev machine: **8000 and 5173 are taken by other users' apps** —
+the backend uses 8010, and pass `--port <n> --strictPort` to Vite when its default is
+busy (it silently hops to 5174 otherwise and you end up curling someone else's app).
 
 Reproducibility check after converter changes (must show no diff, or regenerate and
 commit `resources/` together with the code change):
@@ -52,8 +84,9 @@ done
 git diff --quiet resources/ && echo IDENTICAL
 ```
 
-There is no build, lint, or test suite yet. `index.js`/`package.json` are an empty
-Node scaffold; whether future app code is Node or Python is decided per task.
+There is no lint or test suite yet. Server-side code is Python, the frontend is
+vanilla JS; task 002's upload endpoint should import the converter directly rather
+than shelling out.
 
 ## Working style
 
@@ -68,25 +101,31 @@ Node scaffold; whether future app code is Node or Python is decided per task.
 
 ## Dev environment (this machine)
 
-The dev machine has **no sudo and no Docker**. Everything runs rootless:
+The dev machine is **shared** (multiple users run their own servers) and has **no sudo
+and no Docker**. Everything runs rootless:
 
-- Dekart server: official image via **udocker** — start with
-  `~/.local/bin/udocker run dekart` (background it), serves http://localhost:8080.
-  State persists inside the container rootfs under `~/.udocker`.
-- `dekart` CLI: installed in `~/.local/venvs/dekart`, on PATH as `dekart`, already
-  initialized against localhost. Headless snapshots need the installed
-  `dekart snapshot-local` capability (Playwright Chromium).
-- Never suggest `sudo`/`docker` commands here; use the udocker shim.
-- The **geosql skill** is installed (`~/.claude/skills/geosql`) — invoke it for
-  Dekart map-building work; it documents the CLI workflows this repo relies on.
-- The only Dekart connection is **"Local Files"** (`CONNECTION_TYPE_LOCAL`), so the
-  dekart CLI always operates in **file-upload mode** — there is no warehouse
-  connector; don't attempt query mode.
-- This Dekart build runs zero-config with `DEKART_DATASOURCE=USER` and file upload
-  enabled; the OSS server has no server-side snapshot renderer (hence
-  `snapshot-local`).
+- Never suggest `sudo`/`docker` commands here; use the udocker shim
+  (`~/.local/bin/udocker`) when a container is unavoidable.
+- Headless browser verification: Playwright Chromium works rootless
+  (`pip install playwright && playwright install chromium` in a venv); only system
+  Firefox is preinstalled.
 
-## Dekart CLI pitfalls (all discovered the hard way)
+### Dekart (ad-hoc analysis only, no longer the viewer platform)
+
+- This user's Dekart server: official image via udocker, `-v $HOME/dekart-data:/dekart/data`,
+  port 8090 (**8080 belongs to another user's Dekart**). State: `~/dekart-data/dekart.db`
+  (SQLite, directly readable).
+- The `dekart` CLI and geosql skill referenced by earlier notes are **not installed**
+  on this machine/account. The gRPC-web API works without them: POST to
+  `http://localhost:<port>/Dekart/GetReportStream` (no `/api/v1` prefix, service name
+  is plain `Dekart`), content-type `application/grpc-web+proto`, and the request
+  **must include a StreamOptions field** (field 2; an empty message suffices) or the
+  server rejects with "missing StreamOptions". The report's Kepler `map_config` JSON
+  is embedded in the response and can be regexed out.
+- Runs zero-config with `DEKART_DATASOURCE=USER`; only connection type is
+  "Local Files" (file-upload mode; there is no warehouse connector).
+
+## Dekart CLI pitfalls (historical — kept for ad-hoc Dekart work)
 
 - Control-plane order for file-upload mode: `create_report` → `create_dataset` →
   `update_dataset_name` → `create_file` → `dekart upload-file`; success only when the
@@ -116,25 +155,31 @@ The dev machine has **no sudo and no Docker**. Everything runs rootless:
 
 ## Established map conventions
 
-One layer per asset category, fixed colors identical across drawings: LSkabel orange,
-MSkabel blue-grey, Amantelbuis teal, LSmof pink, LSoverdrachtspunt green,
-OVLoverdrachtspunt yellow, LSkast/MSstation red tones, project boundary (Grens) blue
-outline-only. Hairline strokes, ~3 px points, dark basemap, tooltips showing the NLCS
-attributes. Dataset naming: `<Drawing label> · <Category>`.
+One layer per asset category, fixed colors identical across drawings. The canonical
+values (extracted 2026-07-17 from the Kepler config of the Dekart multi-file demo
+report and codified in `frontend/src/categories.js`):
 
-Multi-file viewing is emulated in stock Kepler by creating **one dataset per
-(file × category)** and toggling layer visibility (default: first file visible,
-others hidden). This is a workaround, not the desired UX — tasks 002–004 replace it
-with real file/object-type toggles on a platform chosen in task 002 (custom viewer vs
-Dekart fork; stock Dekart has no UI extension points).
+| Category | Hex | Style |
+|---|---|---|
+| LSkabel | `#FC8D62` (orange) | line, 0.6 px |
+| MSkabel | `#8DA0CB` (blue-grey) | line, 1.0 px |
+| Amantelbuis | `#66C2A5` (teal) | line, 0.8 px |
+| LSmof | `#E78AC3` (pink) | point, 3 px |
+| LSoverdrachtspunt | `#A6D884` (green) | point, 3 px |
+| OVLoverdrachtspunt | `#FFD92F` (yellow) | point, 3 px |
+| LSkast | `#E65A5A` (red) | polygon fill |
+| MSstation | `#B23C3C` (dark red) | polygon fill |
+| Grens (boundary) | `#4682EB` (blue) | outline-only, 0.8 px |
 
-This convention was established using the old per-category CSV/GeoJSON files. As of
-task 001 (2026-07-17) the converter emits one merged GeoJSON per drawing instead
-(`resources/<name>.geojson`, all categories in one FeatureCollection); getting back to
-one-dataset-per-category for a report now requires an extra split step at
-upload/report-build time (task 101), not just uploading converter output directly.
+All at 0.85 opacity. Dark basemap by default (PDOK BRT grijs as alternative), tooltips
+showing the NLCS attributes, titles `<Drawing label> · <Category>`. Default
+visibility: first drawing on, others off, all object types on.
 
-## Existing demo reports (local Dekart)
+The viewer implements file×category toggling natively (a layer is visible iff its
+drawing toggle AND its category toggle are on) — the old Kepler workaround of one
+dataset per (file × category) is only needed when building Dekart reports (task 101).
+
+## Existing demo reports (local Dekart, historical)
 
 - `16cfa6ff-8734-468b-a9d2-3c5b5e8ba820` — single-file demo of the voorbeeld drawing.
 - `0369a54a-8c47-4ccb-9ef2-a536d805a5e3` — "NLCS++ multi-file viewer" (all three

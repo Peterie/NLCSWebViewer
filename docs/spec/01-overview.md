@@ -3,8 +3,8 @@
 ## Purpose
 
 This project makes **NLCS++ files** (the NLCS Netbeheer XML exchange format used by Dutch grid
-operators) viewable on an **interactive web map**, using [Dekart](https://dekart.xyz) as the
-map viewing platform.
+operators) viewable on an **interactive web map**, through the project's own map viewer built
+on an open-source web-mapping library (MapLibre GL JS).
 
 Today, an NLCS++ file is a drawing-exchange artifact: it travels between contractors
 (aannemers) and grid operators (netbeheerders) as part of the drawing workflow, and it can
@@ -23,13 +23,11 @@ and gets an interactive map in the browser.
 
 ## The key architectural fact
 
-**Dekart does not understand NLCS++.** Dekart is a map analytics tool that visualizes data it
-can consume: results of queries against a connected data source, or common map-ready geodata
-files a user uploads in its interface. It has no notion of XML, GML, or NLCS. This single fact
-shapes the whole architecture: between the NLCS++ file and the Dekart map there must be a
-**conversion pipeline** that parses the file, converts its geometry to web-map coordinates,
-and delivers the result in a form Dekart can consume — records in a queryable data source, or
-a map-ready file the user uploads into Dekart.
+**No web map renders NLCS++ directly.** Web-mapping technology visualizes map-ready geodata —
+georeferenced geometry with attributes in web-map coordinates. It has no notion of XML, GML, or
+NLCS. This single fact shapes the whole architecture: between the NLCS++ file and the map there
+must be a **conversion pipeline** that parses the file, converts its geometry to web-map
+coordinates, and delivers the result as map-ready drawing data the viewer can render.
 
 ## System context
 
@@ -38,25 +36,24 @@ flowchart LR
     user(["User<br/>(engineer, drawer, reviewer)"])
     upload["Upload interface"]
     convert["Conversion pipeline<br/>(parse · validate · transform)"]
-    store[("Converted drawing data<br/>(spatial data source<br/>or map-ready file)")]
-    dekart["Dekart<br/>(map creation & viewing)"]
+    store[("Converted drawing data<br/>(map-ready files)")]
+    viewer["Map viewer<br/>(this project's web app)"]
     map(["Interactive map<br/>in the browser"])
 
     user -- "uploads NLCS++ file" --> upload
     upload --> convert
     convert -- "delivers assets" --> store
-    dekart -- "queries / imports" --> store
-    dekart --> map
+    viewer -- "reads" --> store
+    viewer --> map
     user -- "views & explores" --> map
 ```
 
 The user's mental model is simple — *"I upload a drawing, I get a map"* — but the system
 realises this in two decoupled halves:
 
-1. **Getting data in**: upload → conversion → a form Dekart can consume (this project's own
-   work).
-2. **Getting maps out**: Dekart queries or imports the converted data and renders the map
-   (off-the-shelf).
+1. **Getting data in**: upload → conversion → map-ready drawing data (the ingestion half).
+2. **Getting maps out**: the project's own viewer reads the converted data and renders the
+   map (the visualization half).
 
 ## Scope
 
@@ -64,8 +61,8 @@ realises this in two decoupled halves:
 
 - Manual upload of a single NLCS++ file by a user.
 - Converting that file's project area and asset features into a queryable, georeferenced form.
-- Viewing the drawing as an interactive map in Dekart: layers per asset category, attributes
-  visible per asset, filtering, and sharing a map with colleagues.
+- Viewing the drawing as an interactive map in the project's viewer: layers per asset
+  category, attributes visible per asset, and toggling what is shown.
 
 **Out of scope (future considerations)**
 
@@ -82,7 +79,7 @@ realises this in two decoupled halves:
 | [01-overview.md](01-overview.md) | This document — purpose, context, scope |
 | [02-nlcs-data-format.md](02-nlcs-data-format.md) | What an NLCS++ file is, conceptually |
 | [03-system-architecture.md](03-system-architecture.md) | Components, responsibilities, and data flow |
-| [04-visualization-with-dekart.md](04-visualization-with-dekart.md) | How drawings become maps in Dekart |
+| [04-visualization.md](04-visualization.md) | How drawings become maps in the viewer |
 
 These documents are intentionally free of low-level technical specification: no schemas, no
 code, no version numbers, no configuration. They orient a development team; implementation

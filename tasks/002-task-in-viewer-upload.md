@@ -21,6 +21,27 @@ The decision must be made and **recorded in this task file** as the first step, 
 the architecture docs (`docs/spec/`) updated accordingly, since they currently state
 Dekart is used unmodified.
 
+## Platform decision (2026-07-17)
+
+**Chosen: custom viewer app**, built on MapLibre GL JS with a Python backend that
+serves the converted GeoJSON drawings.
+
+Rationale:
+
+- Stock Dekart has no UI extension points, and a fork would mean maintaining AGPL
+  React code against upstream for every UI task in this range (002–004).
+- A custom viewer owns the whole UI, which is exactly what tasks 002–004 (and likely
+  104) need; it also fits the NLCSWebViewer name.
+- The converter already outputs map-ready WGS84 GeoJSON (task 001), which MapLibre
+  consumes directly — no extra hand-off machinery.
+- Dekart remains available alongside for ad-hoc analysis; nothing is removed.
+
+Display parity with the established Dekart maps was delivered as groundwork under
+this decision (viewer app in `frontend/`, backend in `backend/`, category styling
+extracted from the established Dekart report). The upload button below remains this
+task's deliverable on top of that groundwork. The architecture docs were updated:
+see `docs/spec/03-system-architecture.md` and `docs/spec/04-visualization.md`.
+
 ## Specifications
 
 - A clearly visible control in the viewer UI ("Add NLCS++ file" or similar) that opens

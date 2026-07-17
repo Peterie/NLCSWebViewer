@@ -1,7 +1,7 @@
 # Task Overview
 
-Roadmap for turning the proven NLCS++ → Dekart pipeline into the full web upload
-application described in [docs/spec](../docs/spec/01-overview.md).
+Roadmap for turning the proven NLCS++ conversion pipeline and MapLibre viewer into
+the full web upload application described in [docs/spec](../docs/spec/01-overview.md).
 
 ## Reserved range
 
@@ -36,9 +36,9 @@ numerical order unless dependencies say otherwise.
 ## Ordering rationale
 
 Owner tasks first: switch the pipeline output to GeoJSON (001), then build the viewer
-platform with in-viewer upload (002) and its UI features (003, 004) on top. Task 002
-opens with a recorded platform decision (custom viewer vs Dekart fork) that also
-governs 003–004 and may absorb task 104 — revisit 104 when reached.
+platform with in-viewer upload (002) and its UI features (003, 004) on top. Task 002's
+platform decision is recorded (custom MapLibre viewer, 2026-07-17; see the task file);
+it also governs 003–004 and may absorb task 104 — revisit 104 when reached.
 
 Then the 101+ range: harden the pipeline (101–103) so the conversion path is
 trustworthy, expose it through the web upload interface if still needed (104), add
