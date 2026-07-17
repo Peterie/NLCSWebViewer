@@ -77,10 +77,12 @@ def geometry_geojson(geom_el):
     return None
 
 
-def main(xml_path, out_path):
+def convert(xml_path):
+    """Parse an NLCS++ file (path or file-like) into a GeoJSON FeatureCollection.
+
+    Returns (geojson_dict, counts_by_category, skipped_count).
+    """
     root = ET.parse(xml_path).getroot()
-    out = Path(out_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
 
     features = []
     counts = {}
@@ -120,9 +122,19 @@ def main(xml_path, out_path):
         features.append({"type": "Feature", "geometry": geometry, "properties": props})
         counts[cat] = counts.get(cat, 0) + 1
 
-    with open(out, "w", encoding="utf-8") as f:
-        json.dump({"type": "FeatureCollection", "features": features}, f, ensure_ascii=False)
+    return {"type": "FeatureCollection", "features": features}, counts, skipped
 
+
+def write_geojson(geojson, out_path):
+    out = Path(out_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(geojson, f, ensure_ascii=False)
+
+
+def main(xml_path, out_path):
+    geojson, counts, skipped = convert(xml_path)
+    write_geojson(geojson, out_path)
     for k in sorted(counts):
         print(f"{k}: {counts[k]}")
     print(f"skipped (no geometry): {skipped}")

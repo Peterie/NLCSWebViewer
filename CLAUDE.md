@@ -27,10 +27,36 @@ GeoJSON that the viewer renders. Read `docs/spec/01-overview.md` →
 - `data/` — example NLCS++ files (one voorbeeld + two near-identical revisions of the
   same Sterksel project) and the official XSDs.
 - `scripts/nlcs2geojson.py` — the converter. Python, needs pyproj.
-- `backend/` — FastAPI app: lists/serves `resources/*.geojson` under `/api/drawings`
-  and serves the built frontend from `out/frontend` when present.
-- `frontend/` — the viewer: vanilla JS + Vite + maplibre-gl. Category styling lives in
-  `frontend/src/categories.js` (the canonical color table, see map conventions below).
+- `backend/` — FastAPI app: `GET /api/drawings` (list), `GET /api/drawings/{id}`
+  (serve one), `POST /api/drawings` (upload an NLCS++ XML, converts in-memory via
+  `scripts/nlcs2geojson.convert()` and writes `resources/<id>.geojson` — see task 002),
+  `DELETE /api/drawings/{id}` (removes that file — the only copy, since uploads don't
+  retain the source XML); `GET/PUT/DELETE /api/category-styles(/{id})` and
+  `GET/PUT/DELETE /api/status-styles(/{id})` (persist in-app style edits to
+  `category_styles.json`/`status_styles.json` at repo root — see below); serves the
+  built frontend from `out/frontend` when present. The upload endpoint derives `<id>`
+  by sanitizing the filename stem (non `[A-Za-z0-9_-]` chars → `-`), not by rejecting
+  unusual filenames. Not `--reload`d in this session's dev runs — restart uvicorn
+  after editing `backend/app.py` or a stale process will 405/404 on new routes.
+- `frontend/` — the viewer: vanilla JS + Vite + maplibre-gl. Two independent, composed
+  styling dimensions (see map conventions below): `categories.js`/`categoryStyles.js`
+  own **color** (per category — LSkabel vs LSmof etc.); `statusStyles.js` owns **dash
+  pattern** (cables/boundary) and an **outline ring** (points/polygons) per NLCS
+  *Status* value, so the two never collide on the same visual channel. Both mutate
+  their canonical tables in place after fetching persisted overrides at startup, so
+  every consumer (map.js, panel.js, objects.js) always reads the live effective style
+  straight off those tables — no separate "resolved style" object anywhere.
+  `map.js` splits line/boundary categories into one MapLibre sub-layer per status
+  bucket (dasharray can't be data-driven in MapLibre — zoom-only expression, see the
+  style-spec's `sdk-support` for `line-dasharray`); point/polygon categories stay a
+  single layer using a `match` expression on `status` (circle-stroke-*/
+  fill-outline-color *are* data-driven), so `layerId()`/`allLayerIds()`/
+  `removeDrawing()` all loop `statusBucketsFor(cat)` rather than assuming one layer
+  per (drawing × category). `objects.js` is the object-viewer sidebar
+  (search/browse/detail/highlight, task 004); `highlight.js` is its map overlay
+  (independent of the per-category visibility layers); `geo.js` has the shared
+  feature-bounds helper; `popup.js` is hover-only (click-to-select moved to
+  `objects.js`).
 - `resources/` — converted map-ready output, one `<name>.geojson` per source file
   (boundary + all asset categories merged into a single FeatureCollection, one file per
   drawing — an owner decision made during task 001, superseding the per-category CSV
@@ -171,9 +197,31 @@ report and codified in `frontend/src/categories.js`):
 | MSstation | `#B23C3C` (dark red) | polygon fill |
 | Grens (boundary) | `#4682EB` (blue) | outline-only, 0.8 px |
 
-All at 0.85 opacity. Dark basemap by default (PDOK BRT grijs as alternative), tooltips
-showing the NLCS attributes, titles `<Drawing label> · <Category>`. Default
-visibility: first drawing on, others off, all object types on.
+All at 0.85 opacity by default. Dark basemap by default (PDOK BRT grijs as
+alternative), tooltips showing the NLCS attributes, titles
+`<Drawing label> · <Category>`. Default visibility: first drawing on, others off, all
+object types on.
+
+These are defaults, not fixed: clicking a category's color swatch in the
+Objecttypen panel opens an inline editor (color, opacity, and line width or point
+radius depending on the category's kind) that live-previews on the map and persists
+to `category_styles.json` for every user — "Reset" restores the table above. See
+`frontend/src/categoryStyles.js`.
+
+**Status styling** (`frontend/src/statusStyles.js`) is a second, independent
+dimension on top of category color, edited via the panel's own "Status" section
+(click a status name to open its editor). Pre-seeded with all four *Status* values
+`data/NLCS_Netbeheer.xsd`'s `Status` simpleType actually defines — **BESTAAND,
+NIEUW, REVISIE, VERWIJDERD** — plus an internal `OTHER` fallback bucket for anything
+missing/unrecognized (not exposed in the UI). Defaults: BESTAAND/OTHER are
+unstyled (solid, no outline — today's example data is all BESTAAND, so this
+preserves the original look exactly); NIEUW is dotted + green outline; REVISIE is
+dash-dot + blue outline; VERWIJDERD is dashed + red outline. Editable fields:
+`dashPattern` (solid/dashed/dotted/dash-dot, applies to cables/boundary lines) and
+`outlineEnabled`/`outlineColor`/`outlineWidth` (applies to points/polygons — a
+`circle-stroke`/`fill-outline-color` ring, width forced to 0 when disabled since
+native `<input type=color>` has no alpha channel to represent "no outline" any
+other way). Persists to `status_styles.json`, same pattern as category styles.
 
 The viewer implements file×category toggling natively (a layer is visible iff its
 drawing toggle AND its category toggle are on) — the old Kepler workaround of one

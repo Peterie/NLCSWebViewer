@@ -64,12 +64,34 @@ see `docs/spec/03-system-architecture.md` and `docs/spec/04-visualization.md`.
 
 - From a running viewer, adding `data/enexis_voorbeeld_3092025_1554.xml` via the
   button shows the drawing on the map and creates
-  `resources/enexis_voorbeeld_3092025_1554/` with the converted GeoJSON.
+  `resources/enexis_voorbeeld_3092025_1554.geojson` with the converted GeoJSON
+  (a flat file, per the established convention — not a folder).
 - Adding the same file again replaces (does not duplicate) both the layers and the
   stored output.
 - Adding an invalid XML shows an error and leaves map and `resources/` untouched.
 - The platform decision (custom viewer vs fork) is recorded in this file and
   `docs/spec/` reflects it.
+
+## Implementation notes (2026-07-17)
+
+Delivered: `POST /api/drawings` (backend) accepts a multipart `.xml` upload, converts
+it in-memory via `scripts/nlcs2geojson.convert()`, and writes
+`resources/<id>.geojson`. The frontend's "NLCS++ bestand toevoegen…" button (in the
+new "Toevoegen" panel section) uploads on file selection and adds the drawing to the
+live map/panel without a reload, or replaces it in place if the id already exists.
+
+Two decisions worth recording:
+
+- **Drawing id from filename**: the uploaded filename's stem is sanitized (characters
+  outside `[A-Za-z0-9_-]` become `-`) rather than rejected, so real-world filenames
+  (spaces, parentheses, etc.) still work. The response tells the frontend whether the
+  id was changed, and the status line says "Added as `<id>`" when it was, so a
+  silent rename is never invisible to the user.
+- **Error detail**: since task 102 (schema validation) doesn't exist yet, an invalid
+  file's only failure mode is today's unvalidated parser raising a raw Python
+  exception. The endpoint surfaces that message directly (e.g. "could not convert
+  file: syntax error: line 1, column 0") rather than a generic message — more useful
+  for an internal tool than it would be for a public product.
 
 ## Dependencies
 
