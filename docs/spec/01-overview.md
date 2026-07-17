@@ -23,11 +23,13 @@ and gets an interactive map in the browser.
 
 ## The key architectural fact
 
-**Dekart does not read files.** Dekart is a map analytics tool that visualizes the results of
-queries against a connected data source — it has no notion of XML, GML, or NLCS. This single
-fact shapes the whole architecture: between the NLCS++ file and the Dekart map there must be a
-**conversion pipeline** that parses the file, converts its geometry to web-map coordinates, and
-loads the result into a data source Dekart can query.
+**Dekart does not understand NLCS++.** Dekart is a map analytics tool that visualizes data it
+can consume: results of queries against a connected data source, or common map-ready geodata
+files a user uploads in its interface. It has no notion of XML, GML, or NLCS. This single fact
+shapes the whole architecture: between the NLCS++ file and the Dekart map there must be a
+**conversion pipeline** that parses the file, converts its geometry to web-map coordinates,
+and delivers the result in a form Dekart can consume — records in a queryable data source, or
+a map-ready file the user uploads into Dekart.
 
 ## System context
 
@@ -36,14 +38,14 @@ flowchart LR
     user(["User<br/>(engineer, drawer, reviewer)"])
     upload["Upload interface"]
     convert["Conversion pipeline<br/>(parse · validate · transform)"]
-    store[("Spatial data source<br/>(any Dekart-supported store)")]
+    store[("Converted drawing data<br/>(spatial data source<br/>or map-ready file)")]
     dekart["Dekart<br/>(map creation & viewing)"]
     map(["Interactive map<br/>in the browser"])
 
     user -- "uploads NLCS++ file" --> upload
     upload --> convert
-    convert -- "loads assets" --> store
-    dekart -- "queries" --> store
+    convert -- "delivers assets" --> store
+    dekart -- "queries / imports" --> store
     dekart --> map
     user -- "views & explores" --> map
 ```
@@ -51,8 +53,10 @@ flowchart LR
 The user's mental model is simple — *"I upload a drawing, I get a map"* — but the system
 realises this in two decoupled halves:
 
-1. **Getting data in**: upload → conversion → spatial data source (this project's own work).
-2. **Getting maps out**: Dekart queries the data source and renders the map (off-the-shelf).
+1. **Getting data in**: upload → conversion → a form Dekart can consume (this project's own
+   work).
+2. **Getting maps out**: Dekart queries or imports the converted data and renders the map
+   (off-the-shelf).
 
 ## Scope
 

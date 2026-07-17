@@ -15,6 +15,11 @@ PostgreSQL/PostGIS, or a cloud data warehouse). The architecture only requires t
 store geometry alongside attributes and answer Dekart's queries; the concrete product is an
 implementation choice.
 
+Dekart also accepts direct uploads of common map-ready geodata files through its own
+interface. That opens a second, lighter way to join the two halves — see
+[Hand-off variants](#hand-off-variants) below — but it does not change the split: NLCS++
+never reaches Dekart unconverted.
+
 ## Component view
 
 ```mermaid
@@ -66,14 +71,15 @@ The heart of the system. It performs four conceptual steps, in order:
 4. **Load** — write the records into the spatial data source, grouped under the uploaded
    drawing, so that one drawing's assets can be queried (and later deleted or replaced) as a
    unit. Re-uploading the same drawing replaces its previous content rather than duplicating
-   it.
+   it. In the file hand-off variant the destination is a map-ready file instead — see
+   [Hand-off variants](#hand-off-variants).
 
 ### Spatial data source
 
 Holds the converted drawings. Conceptually it stores, per uploaded drawing: the project
 reference (metadata + boundary), and one record per asset feature (category, geometry,
-attributes). It is the *only* integration point between the two halves — Dekart never sees an
-XML file, and the pipeline never talks to Dekart.
+attributes). It is the integration point between the two halves in the primary design —
+Dekart never sees an NLCS++ file, and the pipeline never talks to Dekart directly.
 
 ### Dekart
 
@@ -111,6 +117,25 @@ confirmation that the drawing is viewable. Opening the map in Dekart runs querie
 data source — typically one query per asset category, so that cables, joints, cabinets, and
 stations arrive as separate map layers — plus the project boundary as an orientation layer
 that frames the initial view.
+
+## Hand-off variants
+
+The two halves can be joined in two ways. Both keep the conversion pipeline unchanged — they
+differ only in where the Load step delivers its output.
+
+- **Shared spatial data source (primary design).** The pipeline loads records into a data
+  source that Dekart queries. Drawings accumulate centrally, remain queryable across uploads,
+  and drawing lifecycle (listing, replacing, deleting) has a natural home. This is the
+  variant shown in the component view and data flow above.
+- **Map-ready file hand-off (lightweight variant).** Dekart lets users upload common
+  map-ready geodata files (such as GeoJSON) directly in its interface. The pipeline can
+  therefore also emit a converted, WGS84, attribute-carrying file that the user uploads into
+  Dekart by hand. No shared database is needed, which makes this attractive for a first
+  iteration or ad-hoc use — at the cost of an extra manual step per drawing, no central
+  drawing inventory, and no queries across drawings.
+
+A first iteration can start with the file hand-off and grow into the shared data source
+without reworking the pipeline: only the Load step's destination changes.
 
 ## Deployment context
 

@@ -7,9 +7,10 @@ self-hosted alternative to services like CARTO and Felt. It was chosen because:
 
 - **Self-hosted.** Utility network data is sensitive; the whole stack can run inside the
   organisation's own environment, with the organisation's own authentication in front of it.
-- **Query-driven.** Dekart turns queries against a connected data source into map layers.
-  Since the ingestion pipeline lands NLCS++ content in exactly such a data source, no custom
-  map application has to be built.
+- **Query-driven, with file upload.** Dekart turns queries against a connected data source
+  into map layers, and also accepts direct uploads of common map-ready geodata files. Both
+  match what the ingestion pipeline can produce, so no custom map application has to be
+  built.
 - **Proven rendering.** Maps are rendered with Kepler.gl, a mature WebGL engine that
   comfortably handles the volume of a drawing (hundreds to thousands of features) and far
   beyond.
@@ -108,8 +109,9 @@ Two conceptual points matter for developers:
 Developers should know where the platform's responsibility ends and custom work (or accepted
 limitation) begins:
 
-- **No file import.** Dekart never ingests XML/GML; the ingestion half of the architecture is
-  irreplaceable.
+- **No NLCS++ import.** Dekart can import common map-ready geodata files uploaded by a user,
+  but never XML/GML/NLCS++. The ingestion half of the architecture is irreplaceable — at most
+  its output changes shape (database records or a map-ready file).
 - **No CAD symbology.** The NLCS drawing standard prescribes line types, symbols, and layer
   conventions for CAD sheets. Dekart renders generic map styling (colours, widths, point
   sizes) — the map is a faithful *data* view, not a facsimile of the CAD drawing. If
