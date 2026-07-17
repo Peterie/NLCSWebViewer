@@ -213,19 +213,29 @@ upload/report-build time (task 101), not just uploading converter output directl
 
 ## Existing demo reports (local Dekart)
 
-**All reports were archived by the owner on 2026-07-17** (via the Dekart UI's
+The owner archived every report that existed as of 2026-07-17 (via the Dekart UI's
 Archive action — there is no delete/archive tool exposed through the `dekart` CLI's
 MCP interface, even though the underlying `ArchiveReport` gRPC method exists in
 Dekart's own client code; confirmed by grepping the served JS bundle for it and
-finding it's not in `dekart tools`' list). This includes `735d42c7-...`, the report
-`dekart/map-style.json` was captured from — archiving is presumed non-destructive
-(a hide/soft-delete toggle, not deletion), but there is currently **no active
-report** in local Dekart to point to as a working example. The style/tooltip
-config lives on in `dekart/map-style.json` regardless of that source report's
-archived state.
+finding it's not in `dekart tools`' list). This included `735d42c7-...`, the
+original source of `dekart/map-style.json` — archiving is presumed non-destructive
+(a hide/soft-delete toggle, not deletion). Reports created since that archival pass:
 
-Next time a report is built (e.g. via `scripts/create_report.py`), record its id
-and purpose here again.
+- `d6e0b67e-eb68-4769-aa50-95414948530a` — "scholtensteeg_revisie_3", built by
+  `scripts/create_report.py`. The owner then hand-styled it in the Dekart UI (light
+  basemap, stroke color driven by the `status` attribute); `dekart/map-style.json`
+  is now a snapshot of *this* report's `map_config`. Treat as **live/owned by the
+  user** — don't overwrite its config.
+- `b6e8a9dd-1dec-4e7c-a39c-08162b0ab623` — throwaway: re-ran
+  `scripts/create_report.py` on the voorbeeld file to verify the updated style
+  (above) applies correctly through the automated tool. Safe to archive.
+- `33b017a7-4edd-42e4-923e-4424f167a3dc` — "scholtensteeg (voorbeeld + revisie 3)",
+  a genuine **multi-file** report (two datasets/layers in one report: `scholtensteeg`
+  visible by default, `scholtensteeg_revisie_3` hidden — the established
+  first-visible-rest-hidden convention). Built by hand via the `dekart` CLI, since
+  `scripts/create_report.py` is deliberately single-file-only (multi-drawing reports
+  are explicitly out of scope for task 101). Kept as a working example of that
+  pattern; useful reference if multi-file report support ever becomes a real task.
 
 ## Domain notes worth knowing
 
