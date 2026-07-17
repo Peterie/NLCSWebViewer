@@ -63,13 +63,38 @@ The attributes carried by every asset (see the format document) drive the visual
   *IN BEDRIJF*.
 - **Distinguish network levels** — low-voltage vs medium-voltage assets in different hues,
   matching how engineers think about the network.
-- **Tooltips** — hovering or clicking an asset shows its attributes (status, owner, function,
-  construction date, identifiers), which is the viewer's answer to "what is this?".
+Beyond styling, attributes are also directly readable per asset — see
+[Inspecting assets](#inspecting-assets) below.
+
+## Inspecting assets
+
+The viewer's answer to *"what is this?"* is built into Dekart's map interaction — it requires
+no custom development:
+
+- **Hover** an asset (a cable line, a joint, a cabinet) and a tooltip appears showing its
+  attribute values.
+- **Click** an asset to select it, so its values can be read calmly and compared while moving
+  the mouse away.
+
+What appears is the descriptive data that asset carries in the drawing: status
+(*BESTAAND*, new, removed), operational state (*Bedrijfstoestand*), owner and manager
+(*Eigenaar*/*Beheerder*), function (*Functie*), construction date (*DatumAanleg*), and
+identifiers linking back to the source file or the asset registration.
+
+Two conceptual points matter for developers:
+
+- **Which fields show is a per-layer choice.** Each layer selects its own attributes and
+  configures which of them the tooltip presents — a cable layer can surface different fields
+  than a joint layer, keeping tooltips relevant instead of exhaustive.
+- **Inspection quality is decided at ingestion time, not in Dekart.** Only attributes that the
+  conversion pipeline loaded as columns alongside the geometry (see
+  [03-system-architecture.md](03-system-architecture.md)) can ever appear in a tooltip. If
+  users must be able to see it, the pipeline must carry it.
 
 ## What the user can do
 
-- **Explore**: pan, zoom, toggle layers, inspect any asset's attributes over a recognisable
-  base map.
+- **Explore**: pan, zoom, toggle layers, and inspect any asset's attributes by hovering or
+  clicking it, over a recognisable base map.
 - **Filter**: narrow a layer by any attribute — only removed assets, only assets of a given
   owner, only cables laid after a date.
 - **Compose and share**: save the composed map as a report and share the link; recipients see
