@@ -5,12 +5,12 @@
       "filters": [],
       "layers": [
         {
-          "id": "1a9phrq",
+          "id": "main",
           "type": "geojson",
           "config": {
-            "dataId": "6f4bab14-9de1-4ba5-bcbd-32d52287f63d",
+            "dataId": "d738a834-3f1c-47b6-9a37-cdcbb7a68d73",
             "columnMode": "geojson",
-            "label": "enexis_voorbeeld_3092025_1554",
+            "label": "scholtensteeg_revisie_3",
             "color": [
               18,
               147,
@@ -29,7 +29,7 @@
             "visConfig": {
               "opacity": 0.8,
               "strokeOpacity": 0.8,
-              "thickness": 0.5,
+              "thickness": 0.1,
               "strokeColor": [
                 221,
                 178,
@@ -49,16 +49,22 @@
                 ]
               },
               "strokeColorRange": {
-                "name": "Global Warming",
-                "type": "sequential",
-                "category": "Uber",
+                "name": "color.customPalette.customOrdinal.status",
+                "type": "customOrdinal",
+                "category": "Custom",
                 "colors": [
-                  "#4C0035",
-                  "#880030",
-                  "#B72F15",
-                  "#D6610A",
-                  "#EF9100",
-                  "#FFC300"
+                  "#6F0D0D",
+                  "#008750"
+                ],
+                "colorMap": [
+                  [
+                    "BESTAAND",
+                    "#6F0D0D"
+                  ],
+                  [
+                    "NIEUW",
+                    "#008750"
+                  ]
                 ]
               },
               "radius": 10,
@@ -117,254 +123,11 @@
           "visualChannels": {
             "colorField": null,
             "colorScale": "quantile",
-            "strokeColorField": null,
-            "strokeColorScale": "quantile",
-            "sizeField": null,
-            "sizeScale": "linear",
-            "heightField": null,
-            "heightScale": "linear",
-            "radiusField": null,
-            "radiusScale": "linear"
-          }
-        },
-        {
-          "id": "8tuofh",
-          "type": "geojson",
-          "config": {
-            "dataId": "f575f29a-2aee-4edf-ba83-37105d692b80",
-            "columnMode": "geojson",
-            "label": "xml_revisie_2",
-            "color": [
-              137,
-              218,
-              193
-            ],
-            "highlightColor": [
-              252,
-              242,
-              26,
-              255
-            ],
-            "columns": {
-              "geojson": "_geojson"
+            "strokeColorField": {
+              "name": "status",
+              "type": "string"
             },
-            "isVisible": false,
-            "visConfig": {
-              "opacity": 0.8,
-              "strokeOpacity": 0.8,
-              "thickness": 0.5,
-              "strokeColor": [
-                179,
-                173,
-                158
-              ],
-              "colorRange": {
-                "name": "Global Warming",
-                "type": "sequential",
-                "category": "Uber",
-                "colors": [
-                  "#4C0035",
-                  "#880030",
-                  "#B72F15",
-                  "#D6610A",
-                  "#EF9100",
-                  "#FFC300"
-                ]
-              },
-              "strokeColorRange": {
-                "name": "Global Warming",
-                "type": "sequential",
-                "category": "Uber",
-                "colors": [
-                  "#4C0035",
-                  "#880030",
-                  "#B72F15",
-                  "#D6610A",
-                  "#EF9100",
-                  "#FFC300"
-                ]
-              },
-              "radius": 10,
-              "sizeRange": [
-                0,
-                10
-              ],
-              "radiusRange": [
-                0,
-                50
-              ],
-              "heightRange": [
-                0,
-                500
-              ],
-              "elevationScale": 5,
-              "stroked": true,
-              "filled": false,
-              "enable3d": false,
-              "wireframe": false,
-              "fixedHeight": false
-            },
-            "hidden": false,
-            "textLabel": [
-              {
-                "field": null,
-                "color": [
-                  255,
-                  255,
-                  255
-                ],
-                "size": 18,
-                "offset": [
-                  0,
-                  0
-                ],
-                "anchor": "start",
-                "alignment": "center",
-                "outlineWidth": 0,
-                "outlineColor": [
-                  255,
-                  0,
-                  0,
-                  255
-                ],
-                "background": false,
-                "backgroundColor": [
-                  0,
-                  0,
-                  200,
-                  255
-                ]
-              }
-            ]
-          },
-          "visualChannels": {
-            "colorField": null,
-            "colorScale": "quantile",
-            "strokeColorField": null,
-            "strokeColorScale": "quantile",
-            "sizeField": null,
-            "sizeScale": "linear",
-            "heightField": null,
-            "heightScale": "linear",
-            "radiusField": null,
-            "radiusScale": "linear"
-          }
-        },
-        {
-          "id": "em5wu1p",
-          "type": "geojson",
-          "config": {
-            "dataId": "50c55984-a337-49ef-a07e-58192ede829d",
-            "columnMode": "geojson",
-            "label": "xml_revisie",
-            "color": [
-              231,
-              159,
-              213
-            ],
-            "highlightColor": [
-              252,
-              242,
-              26,
-              255
-            ],
-            "columns": {
-              "geojson": "_geojson"
-            },
-            "isVisible": true,
-            "visConfig": {
-              "opacity": 0.8,
-              "strokeOpacity": 0.8,
-              "thickness": 0.6,
-              "strokeColor": [
-                30,
-                150,
-                190
-              ],
-              "colorRange": {
-                "name": "Global Warming",
-                "type": "sequential",
-                "category": "Uber",
-                "colors": [
-                  "#4C0035",
-                  "#880030",
-                  "#B72F15",
-                  "#D6610A",
-                  "#EF9100",
-                  "#FFC300"
-                ]
-              },
-              "strokeColorRange": {
-                "name": "Global Warming",
-                "type": "sequential",
-                "category": "Uber",
-                "colors": [
-                  "#4C0035",
-                  "#880030",
-                  "#B72F15",
-                  "#D6610A",
-                  "#EF9100",
-                  "#FFC300"
-                ]
-              },
-              "radius": 4.5,
-              "sizeRange": [
-                0,
-                10
-              ],
-              "radiusRange": [
-                0,
-                50
-              ],
-              "heightRange": [
-                0,
-                500
-              ],
-              "elevationScale": 5,
-              "stroked": true,
-              "filled": false,
-              "enable3d": false,
-              "wireframe": false,
-              "fixedHeight": false
-            },
-            "hidden": false,
-            "textLabel": [
-              {
-                "field": null,
-                "color": [
-                  255,
-                  255,
-                  255
-                ],
-                "size": 18,
-                "offset": [
-                  0,
-                  0
-                ],
-                "anchor": "start",
-                "alignment": "center",
-                "outlineWidth": 0,
-                "outlineColor": [
-                  255,
-                  0,
-                  0,
-                  255
-                ],
-                "background": false,
-                "backgroundColor": [
-                  0,
-                  0,
-                  200,
-                  255
-                ]
-              }
-            ]
-          },
-          "visualChannels": {
-            "colorField": null,
-            "colorScale": "quantile",
-            "strokeColorField": null,
-            "strokeColorScale": "quantile",
+            "strokeColorScale": "customOrdinal",
             "sizeField": null,
             "sizeScale": "linear",
             "heightField": null,
@@ -378,75 +141,7 @@
       "interactionConfig": {
         "tooltip": {
           "fieldsToShow": {
-            "50c55984-a337-49ef-a07e-58192ede829d": [
-              {
-                "name": "category",
-                "format": null
-              },
-              {
-                "name": "functie",
-                "format": null
-              },
-              {
-                "name": "status",
-                "format": null
-              },
-              {
-                "name": "bedrijfstoestand",
-                "format": null
-              },
-              {
-                "name": "beheerder",
-                "format": null
-              },
-              {
-                "name": "datum_aanleg",
-                "format": null
-              },
-              {
-                "name": "netgekoppeld",
-                "format": null
-              },
-              {
-                "name": "subnettype",
-                "format": null
-              }
-            ],
-            "f575f29a-2aee-4edf-ba83-37105d692b80": [
-              {
-                "name": "category",
-                "format": null
-              },
-              {
-                "name": "functie",
-                "format": null
-              },
-              {
-                "name": "status",
-                "format": null
-              },
-              {
-                "name": "bedrijfstoestand",
-                "format": null
-              },
-              {
-                "name": "beheerder",
-                "format": null
-              },
-              {
-                "name": "datum_aanleg",
-                "format": null
-              },
-              {
-                "name": "netgekoppeld",
-                "format": null
-              },
-              {
-                "name": "subnettype",
-                "format": null
-              }
-            ],
-            "6f4bab14-9de1-4ba5-bcbd-32d52287f63d": [
+            "d738a834-3f1c-47b6-9a37-cdcbb7a68d73": [
               {
                 "name": "category",
                 "format": null
@@ -493,7 +188,7 @@
           "enabled": false
         },
         "coordinate": {
-          "enabled": true
+          "enabled": false
         }
       },
       "layerBlending": "normal",
@@ -504,55 +199,24 @@
         "speed": 1
       },
       "editor": {
-        "features": [
-          {
-            "properties": {
-              "category": "LSoverdrachtspunt",
-              "handle": "5FCE",
-              "status": "BESTAAND",
-              "bedrijfstoestand": "IN BEDRIJF",
-              "functie": "Huisaansluiting",
-              "subnettype": "",
-              "eigenaar": "Netbeheerder",
-              "beheerder": "Netbeheerder",
-              "datum_aanleg": "",
-              "netgekoppeld": "",
-              "bovengronds": "",
-              "asset_id": "{00000000-0000-0000-0000-000000000000}",
-              "feature_id": "_0D9A048C-3F35-46EB-98F8-52C586C8E03E",
-              "projectnummer": null,
-              "netbeheerder": null,
-              "tekeningtype": null,
-              "toelichting": null
-            },
-            "type": "Feature",
-            "geometry": {
-              "type": "Point",
-              "coordinates": [
-                5.6107922,
-                51.317253
-              ]
-            },
-            "id": "1o7f"
-          }
-        ],
+        "features": [],
         "visible": true
       }
     },
     "mapState": {
       "bearing": 0,
       "dragRotate": false,
-      "latitude": 51.31721140121471,
-      "longitude": 5.610899219221461,
+      "latitude": 52.5304242,
+      "longitude": 6.0372664,
       "pitch": 0,
-      "zoom": 18.420128667472106,
+      "zoom": 15.877315552429963,
       "isSplit": false,
       "isViewportSynced": true,
       "isZoomLocked": false,
       "splitMapViewports": []
     },
     "mapStyle": {
-      "styleType": "dark",
+      "styleType": "light",
       "topLayerGroups": {},
       "visibleLayerGroups": {
         "label": true,

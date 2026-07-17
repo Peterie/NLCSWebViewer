@@ -133,6 +133,16 @@ The dev machine has **no sudo and no Docker**. Everything runs rootless:
   must be `"_geojson"` for a raw `.geojson` file upload, vs the literal WKT column
   name (e.g. `"geometry"`) for a CSV-with-WKT upload — they're processed differently
   client-side.
+- Editing a report's style/basemap in the Dekart UI does **not** autosave — layer
+  panel and basemap changes update the live preview only. There's a distinct
+  **"Save Map"** action (Kepler's own `SaveMapModalFactory`, a modal you must open
+  and confirm) that's the only thing that actually calls `UpdateReportMapConfig` and
+  persists the change. Symptom when missed: `get_report_properties` keeps returning
+  the old `map_config` with an unchanged `version_id`, even right after the user says
+  they saved — took two round-trips to catch since there's no error, just silent
+  non-persistence. When re-capturing `dekart/map-style.json` after the owner styles a
+  report by hand, always confirm `version_id` actually changed before trusting the
+  fetch.
 
 ## Established map conventions
 

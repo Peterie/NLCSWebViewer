@@ -1,19 +1,30 @@
 # Dekart map style
 
 `map-style.json` is a snapshot of a Dekart report's `map_config` — the same JSON
-structure the `dekart` CLI's `update_report_map_config` tool writes. It was pulled
-from report `735d42c7-fba5-40d0-9e9d-a3b382403ddd` on 2026-07-17 after manually
-configuring the layers and tooltip in the Dekart UI the way the project owner wants
-new reports to look.
+structure the `dekart` CLI's `update_report_map_config` tool writes. Originally
+pulled from report `735d42c7-fba5-40d0-9e9d-a3b382403ddd` on 2026-07-17; updated the
+same day from report `d6e0b67e-eb68-4769-aa50-95414948530a` ("scholtensteeg_revisie_3",
+built by `scripts/create_report.py`) after the owner tweaked styling and basemap by
+hand in the Dekart UI. Re-capture whenever the owner changes the style again — see
+"Reapplying it to a new report" below for the gotcha that cost a round-trip finding
+this out.
 
-It captures two things:
+It captures three things:
 
 - **Tooltip fields** (`config.visState.interactionConfig.tooltip.fieldsToShow`): the
   same 8 fields for every dataset in that report — `category`, `functie`, `status`,
   `bedrijfstoestand`, `beheerder`, `datum_aanleg`, `netgekoppeld`, `subnettype`.
 - **Drawing style** (`config.visState.layers[*].config`): one `geojson`-type layer
-  per uploaded file, each with its own fixed color, stroke color/width, point radius,
-  and `filled: false` / `stroked: true` (outline-only rendering — no fill).
+  per uploaded file, `filled: false` / `stroked: true` (outline-only rendering — no
+  fill), thin stroke (`thickness: 0.1`), point radius 10. Stroke color is
+  **data-driven**, not fixed: `visualChannels.strokeColorField` is bound to the
+  `status` attribute with a custom ordinal color map
+  (`visConfig.strokeColorRange.colorMap`) — `BESTAAND` (existing) → dark red
+  `#6F0D0D`, `NIEUW` (new) → green `#008750`. This is genuinely portable across
+  reports as-is, since it references the `status` field by name, not by dataset id —
+  no substitution needed for this part.
+- **Basemap**: `config.mapStyle.styleType` is `"light"` (was `"dark"` in the original
+  capture).
 
 ## What's portable and what isn't
 
